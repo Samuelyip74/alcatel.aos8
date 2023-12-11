@@ -54,21 +54,11 @@ class HostnameFacts(object):
 
         if not data:
             data = self.get_hostname_data(connection)
-            x =  data.replace('"', "")
-            data = x
+            # x =  data.replace('"', "")
+            # data = x
 
-
-        # parse native config using the Hostname template
         hostname_parser = HostnameTemplate(lines=data.splitlines(), module=self._module)
-        # objs = list(hostname_parser.parse().values())
-
-        # ansible_facts['ansible_network_resources'].pop('hostname', None)
-
-        # params = utils.remove_empties(
-        #     hostname_parser.validate_config(self.argument_spec, {"config": objs}, redact=True)
-        # )
-
-        # facts["hostname"] = params["config"]        
+       
         objs = json.dumps((hostname_parser.parse()))
         ansible_facts["ansible_network_resources"].pop("hostname", None)
 

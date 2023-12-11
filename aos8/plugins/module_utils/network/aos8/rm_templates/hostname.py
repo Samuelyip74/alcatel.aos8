@@ -27,8 +27,8 @@ class HostnameTemplate(NetworkTemplate):
     PARSERS = [
         {
             "name": "hostname",
-            "getval": r"^system name (?P<hostname>.*)",
-            "setval": "system name {{ hostname }}",
+            "getval": r"^system name \"(?P<hostname>.*)\"",
+            "setval": 'system name "{{ hostname }}"',
             "result": {
                 "hostname": "{{ hostname }}",
             },
