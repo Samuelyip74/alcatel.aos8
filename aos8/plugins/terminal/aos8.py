@@ -56,6 +56,7 @@ class TerminalModule(TerminalBase):
         re.compile(rb"% BGP: Error initializing topology", re.I),
         re.compile(rb"%SNMP agent not enabled", re.I),
         re.compile(rb"% Invalid", re.I),
+        re.compile(rb"ERROR: Invalid entry:", re.I),
     ]
 
     terminal_config_prompt = re.compile(r"->$")
@@ -63,7 +64,6 @@ class TerminalModule(TerminalBase):
     def on_open_shell(self):
         prompt = self._get_prompt()
         if prompt is None:
-            # if prompt is None most likely the terminal is hung up at a prompt
             return
 
         # if b"->" in prompt:

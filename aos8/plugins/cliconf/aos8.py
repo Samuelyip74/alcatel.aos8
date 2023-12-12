@@ -265,49 +265,6 @@ class Cliconf(CliconfBase):
         diff["banner_diff"] = banners if banners else {}
         return diff
 
-    def configure(self):
-        """
-        Enter global configuration mode based on the
-        status of commit_confirm
-        :return: None
-        """
-        self.send_command("\n")
-        # if self.get_option("commit_confirm_timeout") or self.get_option("commit_confirm_immediate"):
-        #     commit_timeout = (
-        #         self.get_option("commit_confirm_timeout")
-        #         if self.get_option("commit_confirm_timeout")
-        #         else 1
-        #     )  # add default timeout not default: 1 to support above or operation
-
-        #     persistent_command_timeout = self._connection.get_option("persistent_command_timeout")
-        #     # check archive state
-        #     archive_state = self.send_command("show archive")
-        #     rollback_state = self.send_command("show archive config rollback timer")
-
-        #     if persistent_command_timeout > commit_timeout * 60:
-        #         raise ValueError(
-        #             "ansible_command_timeout can't be greater than commit_confirm_timeout "
-        #             "Please adjust and try again",
-        #         )
-
-        #     if re.search(r"Archive.*not.enabled", archive_state):
-        #         raise ValueError(
-        #             "commit_confirm_immediate option set, but archiving "
-        #             "not enabled on device. "
-        #             "Please set up archiving and try again",
-        #         )
-
-        #     if not re.search(r"%No Rollback Confirmed Change pending", rollback_state):
-        #         raise ValueError(
-        #             "Existing rollback change already pending. "
-        #             "Please resolve by issuing 'configure confirm' "
-        #             "or 'configure revert now'",
-        #         )
-
-        #     self.send_command(f"configure terminal revert timer {commit_timeout}")
-        # else:
-        #     self.send_command("configure terminal")
-
     def edit_config(self, candidate=None, commit=True, replace=None, comment=None):
         resp = {}
         operations = self.get_device_operations()
@@ -315,10 +272,8 @@ class Cliconf(CliconfBase):
 
         results = []
         requests = []
-        # commit confirm specific attributes
-        commit_confirm = self.get_option("commit_confirm_immediate")
+
         if commit:
-            self.configure()
             for line in to_list(candidate):
                 if not isinstance(line, Mapping):
                     line = {"command": line}
@@ -327,10 +282,6 @@ class Cliconf(CliconfBase):
                 if cmd != "end" and cmd[0] != "!":
                     results.append(self.send_command(**line))
                     requests.append(cmd)
-
-            self.send_command("end")
-            if commit_confirm:
-                self.send_command("configure confirm")
 
         else:
             raise ValueError("check mode is not supported")
