@@ -405,7 +405,6 @@ class Cliconf(CliconfBase):
     def get_device_info(self):
         if not self._device_info:
             device_info = {}
-
             device_info["network_os"] = "aos8"
             reply = self.get(command="show system")
             data = to_text(reply, errors="surrogate_or_strict").strip()
@@ -413,11 +412,9 @@ class Cliconf(CliconfBase):
             if match:
                 device_info["network_os_model"] = match.group(1)
                 device_info["network_os_version"] = match.group(2)
-
             match = re.search(r"Up Time:\s+(.*)\,", data, re.M)
             if match:
                 device_info["network_os_uptime"] = match.group(1)
-                
             self._device_info = device_info
         return self._device_info
 
