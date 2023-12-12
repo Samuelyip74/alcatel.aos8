@@ -403,7 +403,6 @@ class Cliconf(CliconfBase):
         )
 
     def get_device_info(self):
-        file1 = open('/home/sadmin/myfile.txt', 'a')
         if not self._device_info:
             device_info = {}
 
@@ -419,10 +418,7 @@ class Cliconf(CliconfBase):
             if match:
                 device_info["network_os_uptime"] = match.group(1)
                 
-            file1.write(str(device_info))
             self._device_info = device_info
-        file1.close()
-
         return self._device_info
 
     def get_device_operations(self):
