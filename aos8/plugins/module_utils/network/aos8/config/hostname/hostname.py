@@ -68,7 +68,7 @@ class Hostname(ResourceModule):
         haved = self.have
 
         if self.state == "deleted":
-            wantd = {}
+            wantd = { 'hostname' : 'changeme'}
 
         self._compare(want=wantd, have=haved)
 
