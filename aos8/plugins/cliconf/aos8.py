@@ -402,47 +402,26 @@ class Cliconf(CliconfBase):
             check_all=check_all,
         )
 
-    def check_device_type(self):
-        device_type = "L2"
-        try:
-            self.get(command="show vlan")
-        except Exception:
-            device_type = "L3"
-        return device_type
-
     def get_device_info(self):
+        file1 = open('/home/sadmin/myfile.txt', 'a')
         if not self._device_info:
             device_info = {}
 
-            device_info["network_os"] = "ios"
-            # Ensure we are not in config mode
-            self._update_cli_prompt_context(config_context=")#", exit_command="end")
-            reply = self.get(command="show version")
+            device_info["network_os"] = "aos8"
+            reply = self.get(command="show system")
             data = to_text(reply, errors="surrogate_or_strict").strip()
-            match = re.search(r"Version (\S+)", data)
+            match = re.search(r"Alcatel-Lucent Enterprise\s([\w\s]+\-[\w]+)\s([0-9.RAG\s]+)\,", data)
             if match:
-                device_info["network_os_version"] = match.group(1).strip(",")
+                device_info["network_os_model"] = match.group(1)
+                device_info["network_os_version"] = match.group(2)
 
-            model_search_strs = [
-                r"^[Cc]isco (.+) \(revision",
-                r"^[Cc]isco (\S+).+bytes of .*memory",
-            ]
-            for item in model_search_strs:
-                match = re.search(item, data, re.M)
-                if match:
-                    version = match.group(1).split(" ")
-                    device_info["network_os_model"] = version[0]
-                    break
-
-            match = re.search(r"^(.+) uptime", data, re.M)
+            match = re.search(r"Up Time:\s+(.*)\,", data, re.M)
             if match:
-                device_info["network_os_hostname"] = match.group(1)
-
-            match = re.search(r'image file is "(.+)"', data)
-            if match:
-                device_info["network_os_image"] = match.group(1)
-            device_info["network_os_type"] = self.check_device_type()
+                device_info["network_os_uptime"] = match.group(1)
+                
+            file1.write(str(device_info))
             self._device_info = device_info
+        file1.close()
 
         return self._device_info
 
