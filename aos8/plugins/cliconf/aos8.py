@@ -273,18 +273,24 @@ class Cliconf(CliconfBase):
         results = []
         requests = []
 
-        if commit:
-            for line in to_list(candidate):
-                if not isinstance(line, Mapping):
-                    line = {"command": line}
+        device_running_directory_state = self.check_running_directory()
 
-                cmd = line["command"]
-                if cmd != "end" and cmd[0] != "!":
-                    results.append(self.send_command(**line))
-                    requests.append(cmd)
-
+        if device_running_directory_state is None:
+            raise ValueError("Device not ready!")
+        elif device_running_directory_state == "WORKING":
+            if commit:
+                for line in to_list(candidate):
+                    if not isinstance(line, Mapping):
+                        line = {"command": line}
+                    cmd = line["command"]
+                    if cmd != "exit" and cmd[0] != "!":
+                        results.append(self.send_command(**line))
+                        requests.append(cmd)
+                self.write_memory()
+            else:
+                raise ValueError("check mode is not supported")
         else:
-            raise ValueError("check mode is not supported")
+            raise ValueError("Device in CERTIFIED mode")
 
         resp["request"] = requests
         resp["response"] = results
@@ -352,6 +358,25 @@ class Cliconf(CliconfBase):
             newline=newline,
             check_all=check_all,
         )
+
+    def check_running_directory(self):
+        reply = self.get(command="show running-directory")
+        data = to_text(reply, errors="surrogate_or_strict").strip()
+        match = re.search(r"Running configuration\s*:\s(.*)\,", data)
+        if match:
+            return match.group(1)
+        else:
+            return None
+
+    def write_memory(self):
+        reply = self.get(command="write memory flash-synchro")
+        reply = self.get(command="show running-directory")
+        data = to_text(reply, errors="surrogate_or_strict").strip()
+        match = re.search(r"NOT SYNCHRONIZED", data)
+        if match:
+            raise ValueError("Configuration not synchronized.")
+        else:
+            return True
 
     def get_device_info(self):
         if not self._device_info:
