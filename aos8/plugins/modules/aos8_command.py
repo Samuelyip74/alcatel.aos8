@@ -201,31 +201,10 @@ def main():
     warnings = list()
     result = {"changed": False, "warnings": warnings}
     commands = parse_commands(module, warnings)
-    wait_for = module.params["wait_for"] or list()
-    conditionals = []
-    try:
-        conditionals = [Conditional(c) for c in wait_for]
-    except AttributeError as exc:
-        module.fail_json(msg=to_text(exc))
-    retries = module.params["retries"]
-    interval = module.params["interval"]
-    match = module.params["match"]
-    while retries >= 0:
-        responses = run_commands(module, commands)
-        for item in list(conditionals):
-            if item(responses):
-                if match == "any":
-                    conditionals = list()
-                    break
-                conditionals.remove(item)
-        if not conditionals:
-            break
-        time.sleep(interval)
-        retries -= 1
-    if conditionals:
-        failed_conditions = [item.raw for item in conditionals]
-        msg = "One or more conditional statements have not been satisfied"
-        module.fail_json(msg=msg, failed_conditions=failed_conditions)
+    responses = run_commands(module, commands)
+
+    module.params["output"] = list(to_lines(responses))
+
     result.update({"stdout": responses, "stdout_lines": list(to_lines(responses))})
     module.exit_json(**result)
 

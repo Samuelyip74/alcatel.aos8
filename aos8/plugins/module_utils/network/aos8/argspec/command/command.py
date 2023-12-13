@@ -33,8 +33,5 @@ class CommandArgs(object):  # pylint: disable=R0903
 
     argument_spec = {
         "commands": {"required": True, "type": "list", "elements": "raw"},
-        "wait_for": {"aliases": ["waitfor"], "type": "list", "elements": "str"},
-        "match": {"default": "all", "type": "str", "choices": ["any", "all"]},
-        "retries": {"default": 9, "type": "int"},
-        "interval": {"default": 1, "type": "int"},
+        "output": {"aliases": ["output"], "type": "list", "elements": "str"},
     }  # pylint: disable=C0301

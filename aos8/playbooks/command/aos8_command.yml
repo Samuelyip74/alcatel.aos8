@@ -6,7 +6,4 @@
   - name: Run multiple commands on remote nodes
     alcatel.aos8.aos8_command:
       commands:
-        - show configuration snapshot
-        - show system        
-        - show interface
-        - show ip routes
+        - show system 
