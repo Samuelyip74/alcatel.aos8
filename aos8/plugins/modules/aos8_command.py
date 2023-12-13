@@ -48,50 +48,18 @@ options:
     required: true
     type: list
     elements: raw
-  wait_for:
+  output:
     description:
-      - List of conditions to evaluate against the output of the command. The task will
-        wait for each condition to be true before moving forward. If the conditional
-        is not true within the configured number of retries, the task fails. See examples.
+      - Print the output of the command(s), if any.
     aliases:
-      - waitfor
+      - output
     type: list
     elements: str
-  match:
-    description:
-      - The I(match) argument is used in conjunction with the I(wait_for) argument to
-        specify the match policy.  Valid values are C(all) or C(any).  If the value
-        is set to C(all) then all conditionals in the wait_for must be satisfied.  If
-        the value is set to C(any) then only one of the values must be satisfied.
-    default: all
-    type: str
-    choices:
-      - any
-      - all
-  retries:
-    description:
-      - Specifies the number of retries a command should by tried before it is considered
-        failed. The command is run on the target device every retry and evaluated against
-        the I(wait_for) conditions.
-    default: 9
-    type: int
-  interval:
-    description:
-      - Configures the interval in seconds to wait between retries of the command. If
-        the command does not pass the specified conditions, the interval indicates how
-        long to wait before trying the command again.
-    default: 1
-    type: int
 
 EXAMPLES:
-- name: Run show version on remote devices
+- name: Run show system on remote devices
   alcatel.aos8.aos8_command:
     commands: show system
-
-- name: Run show version and check to see if output contains aos8
-  alcatel.aos8.aos8_command:
-    commands: show system
-    wait_for: result[0] contains aos8
 
 - name: Run multiple commands on remote nodes
   alcatel.aos8.aos8_command:
@@ -99,66 +67,150 @@ EXAMPLES:
       - show system
       - show interfaces
 
-- name: Run multiple commands and evaluate the output
+"""
+
+EXAMPLES = r"""
+
+- name: Run show system command on remote nodes
   alcatel.aos8.aos8_command:
     commands:
-      - show system
-      - show interfaces
-    wait_for:
-      - result[0] contains aos8
-      - result[1] contains Loopback0
+      - show system 
+
+# output-
+#ok: [aos8appliance] => {
+#    "changed": false,
+#    "invocation": {
+#        "module_args": {
+#            "commands": [
+#                "show system"
+#            ],
+#            "output": [
+#                [
+#                    "System:",
+#                    "  Description:  Alcatel-Lucent Enterprise OS6860E-P24 8.9.221.R03 GA, October 12, 2023.,",
+#                    "  Object ID:    1.3.6.1.4.1.6486.801.1.1.2.1.11.1.6,",
+#                    "  Up Time:      22 days 22 hours 8 minutes and 21 seconds,",
+#                    "  Contact:      ,",
+#                    "  Name:         
+#                    "  Location:     ,",
+#                    "  Services:     78,",
+#                    "  Date & Time:  WED DEC 13 2023 23:11:06 (ZP8)",
+#                    "Flash Space:",
+#                    "    Primary CMM:",
+#                    "      Available (bytes):  803958784,",
+#                    "      Comments         :  None"
+#                ]
+#            ]
+#        }
+#    },
+#    "stdout": [
+#        "System:\n  Description:  Alcatel-Lucent Enterprise OS6860E-P24 8.9.221.R03 GA, October 12, 2023.,\n  Object ID:    1.3.6.1.4.1.6486.801.1.1.2.1.11.1.6,\n  Up Time:      22 days 22 hours 8 minutes and 21 seconds,\n  Contact:      ,\n  Name:         \n  Location:     ,\n  Services:     78,\n  Date & Time:  WED DEC 13 2023 23:11:06 (ZP8)\nFlash Space:\n    Primary CMM:\n      Available (bytes):  803958784,\n      Comments         :  None"
+#    ],
+#    "stdout_lines": [
+#        [
+#            "System:",
+#            "  Description:  Alcatel-Lucent Enterprise OS6860E-P24 8.9.221.R03 GA, October 12, 2023.,",
+#            "  Object ID:    1.3.6.1.4.1.6486.801.1.1.2.1.11.1.6,",
+#            "  Up Time:      22 days 22 hours 8 minutes and 21 seconds,",
+#            "  Contact:      ,",
+#            "  Name:         
+#            "  Location:     b,",
+#            "  Services:     78,",
+#            "  Date & Time:  WED DEC 13 2023 23:11:06 (ZP8)",
+#            "Flash Space:",
+#            "    Primary CMM:",
+#            "      Available (bytes):  803958784,",
+#            "      Comments         :  None"
+#        ]
+#    ]
+
+
+- name: Run multiple commands on remote nodes
+  alcatel.aos8.aos8_command:
+    commands:
+      - show system 
+      - show ip interface
+      
+# output-
+#ok: [aos8appliance] => {
+#    "changed": false,
+#    "invocation": {
+#        "module_args": {
+#            "commands": [
+#                "show system",
+#                "show ip interface"
+#            ],
+#            "output": [
+#                [
+#                    "System:",
+#                    "  Description:  Alcatel-Lucent Enterprise OS6860E-P24 8.9.221.R03 GA, October 12, 2023.,",
+#                    "  Object ID:    1.3.6.1.4.1.6486.801.1.1.2.1.11.1.6,",
+#                    "  Up Time:      22 days 22 hours 13 minutes and 13 seconds,",
+#                    "  Contact:      ,",
+#                    "  Name:         
+#                    "  Location:     
+#                    "  Services:     78,",
+#                    "  Date & Time:  WED DEC 13 2023 23:15:58 (ZP8)",
+#                    "Flash Space:",
+#                    "    Primary CMM:",
+#                    "      Available (bytes):  803958784,",
+#                    "      Comments         :  None"
+#                ],
+#                [
+#                    "Total 6 interfaces",
+#                    " Flags (D=Directly-bound)",
+#                    "",
+#                    "            Name                 IP Address      Subnet Mask     Status Forward  Device   Flags",
+#                    "--------------------------------+---------------+---------------+------+-------+---------+------",
+#                    "EMP-CHAS1                        11.1.1.1        255.255.255.0   DOWN   NO      EMP         ",
+#                    "EMP-CMMA-CHAS1                   0.0.0.0         0.0.0.0         DOWN   NO      EMP         ",
+#                    "Loopback                         127.0.0.1       255.255.255.255 UP     NO      Loopback    ",
+#                    "Loopback0                        10.0.0.4        255.255.255.255 UP     YES     Loopback0    ",
+#                    "int-33                           192.168.33.1    255.255.255.0   DOWN   NO      vlan 33     ",
+#                    "int-vl1                          192.168.70.1    255.255.255.0   UP     NO      vlan 1"
+#                ]
+#            ]
+#        }
+#    },
+#    "stdout": [
+#        "System:\n  Description:  Alcatel-Lucent Enterprise OS6860E-P24 8.9.221.R03 GA, October 12, 2023.,\n  Object ID:    1.3.6.1.4.1.6486.801.1.1.2.1.11.1.6,\n  Up Time:      22 days 22 hours 13 minutes and 13 seconds,\n  Contact:      ,\n  Name:         ACSW01,\n  Location:     ALE Demo Lab,\n  Services:     78,\n  Date & Time:  WED DEC 13 2023 23:15:58 (ZP8)\nFlash Space:\n    Primary CMM:\n      Available (bytes):  803958784,\n      Comments         :  None",
+#        "Total 6 interfaces\n Flags (D=Directly-bound)\n\n            Name                 IP Address      Subnet Mask     Status Forward  Device   Flags\n--------------------------------+---------------+---------------+------+-------+---------+------\nEMP-CHAS1                        11.1.1.1        255.255.255.0   DOWN   NO      EMP         \nEMP-CMMA-CHAS1                   0.0.0.0         0.0.0.0         DOWN   NO      EMP         \nLoopback                         127.0.0.1       255.255.255.255 UP     NO      Loopback    \nLoopback0                        10.0.0.4        255.255.255.255 UP     YES     Loopback0    \nint-33                           192.168.33.1    255.255.255.0   DOWN   NO      vlan 33     \nint-vl1                          192.168.70.1    255.255.255.0   UP     NO      vlan 1"
+#    ],
+#    "stdout_lines": [
+#        [
+#            "System:",
+#            "  Description:  Alcatel-Lucent Enterprise OS6860E-P24 8.9.221.R03 GA, October 12, 2023.,",
+#            "  Object ID:    1.3.6.1.4.1.6486.801.1.1.2.1.11.1.6,",
+#            "  Up Time:      22 days 22 hours 13 minutes and 13 seconds,",
+#            "  Contact:      ,",
+#            "  Name:         
+#            "  Location:     
+#            "  Services:     78,",
+#            "  Date & Time:  WED DEC 13 2023 23:15:58 (ZP8)",
+#            "Flash Space:",
+#            "    Primary CMM:",
+#            "      Available (bytes):  803958784,",
+#            "      Comments         :  None"
+#        ],
+#        [
+#            "Total 6 interfaces",
+#            " Flags (D=Directly-bound)",
+#            "",
+#            "            Name                 IP Address      Subnet Mask     Status Forward  Device   Flags",
+#            "--------------------------------+---------------+---------------+------+-------+---------+------",
+#            "EMP-CHAS1                        11.1.1.1        255.255.255.0   DOWN   NO      EMP         ",
+#            "EMP-CMMA-CHAS1                   0.0.0.0         0.0.0.0         DOWN   NO      EMP         ",
+#            "Loopback                         127.0.0.1       255.255.255.255 UP     NO      Loopback    ",
+#            "Loopback0                        10.0.0.4        255.255.255.255 UP     YES     Loopback0    ",
+#            "int-33                           192.168.33.1    255.255.255.0   DOWN   NO      vlan 33     ",
+#            "int-vl1                          192.168.70.1    255.255.255.0   UP     NO      vlan 1"
+#        ]
+#    ]
+#}
+
+
 """
 
-EXAMPLES = """
-
-"""
-
-RETURN = """
-before:
-  description: The configuration prior to the module execution.
-  returned: when I(state) is C(merged), C(replaced), C(overridden), C(deleted) or C(purged)
-  type: dict
-  sample: >
-    This output will always be in the same format as the
-    module argspec.
-after:
-  description: The resulting configuration after module execution.
-  returned: when changed
-  type: dict
-  sample: >
-    This output will always be in the same format as the
-    module argspec.
-commands:
-  description: The set of commands pushed to the remote device.
-  returned: when I(state) is C(merged), C(replaced), C(overridden), C(deleted) or C(purged)
-  type: list
-  sample:
-    - sample command 1
-    - sample command 2
-    - sample command 3
-rendered:
-  description: The provided configuration in the task rendered in device-native format (offline).
-  returned: when I(state) is C(rendered)
-  type: list
-  sample:
-    - sample command 1
-    - sample command 2
-    - sample command 3
-gathered:
-  description: Facts about the network resource gathered from the remote device as structured data.
-  returned: when I(state) is C(gathered)
-  type: list
-  sample: >
-    This output will always be in the same format as the
-    module argspec.
-parsed:
-  description: The device native config provided in I(running_config) option parsed into structured data as per module argspec.
-  returned: when I(state) is C(parsed)
-  type: list
-  sample: >
-    This output will always be in the same format as the
-    module argspec.
-"""
 import time
 from ansible.module_utils._text import to_text
 from ansible.module_utils.basic import AnsibleModule

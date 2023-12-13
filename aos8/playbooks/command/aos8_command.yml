@@ -7,3 +7,4 @@
     alcatel.aos8.aos8_command:
       commands:
         - show system 
+        - show ip interface
