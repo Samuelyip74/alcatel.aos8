@@ -29,19 +29,20 @@ from ansible.module_utils._text import to_bytes, to_text
 from ansible.utils.display import Display
 from ansible_collections.ansible.netcommon.plugins.plugin_utils.terminal_base import TerminalBase
 
-
 display = Display()
-
 
 class TerminalModule(TerminalBase):
     terminal_stdout_re = [re.compile(rb"[\r\n]?[\w\+\-\.:\/\[\]]+(?:\([^\)]+\)){0,3}(?:[>#]) ?$")]
 
+    """
+        List down all the known error messages from the device.
+    """
     terminal_stderr_re = [
         re.compile(rb"% ?Error"),
         # re.compile(rb"^% \w+", re.M),
         re.compile(rb"% ?Bad secret"),
         re.compile(rb"[\r\n%] Bad passwords"),
-        re.compile(rb"invalid input", re.I),
+        re.compile(rb"ERROR: Invalid entry:", re.I),                # AOS8
         re.compile(rb"(?:incomplete|ambiguous) command", re.I),
         re.compile(rb"connection timed out", re.I),
         re.compile(rb"[^\r\n]+ not found"),
@@ -56,7 +57,6 @@ class TerminalModule(TerminalBase):
         re.compile(rb"% BGP: Error initializing topology", re.I),
         re.compile(rb"%SNMP agent not enabled", re.I),
         re.compile(rb"% Invalid", re.I),
-        re.compile(rb"ERROR: Invalid entry:", re.I),
     ]
 
     terminal_config_prompt = re.compile(r"->$")
@@ -65,9 +65,3 @@ class TerminalModule(TerminalBase):
         prompt = self._get_prompt()
         if prompt is None:
             return
-
-        # if b"->" in prompt:
-        #     self._exec_cli_command(b"exit")
-
-        # elif prompt.endswith(b"->"):
-        #     self._exec_cli_command(b"exit")

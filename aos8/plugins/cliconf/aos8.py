@@ -273,19 +273,21 @@ class Cliconf(CliconfBase):
         results = []
         requests = []
 
-        device_running_directory_state = self.check_running_directory()
 
+        device_running_directory_state = self.check_running_directory()
+        # check if device is running configuration from working directory.
         if device_running_directory_state is None:
             raise ValueError("Device not ready!")
         elif device_running_directory_state == "WORKING":
-            if commit:
-                for line in to_list(candidate):
-                    if not isinstance(line, Mapping):
-                        line = {"command": line}
-                    cmd = line["command"]
-                    if cmd != "exit" and cmd[0] != "!":
-                        results.append(self.send_command(**line))
-                        requests.append(cmd)
+            for line in to_list(candidate):
+                if not isinstance(line, Mapping):
+                    line = {"command": line}
+                cmd = line["command"]
+                if cmd != "exit" and cmd[0] != "!":
+                    results.append(self.send_command(**line))
+                    requests.append(cmd)            
+            # write memory and sych working and certified directory
+            if commit:        
                 self.write_memory()
             else:
                 raise ValueError("check mode is not supported")
@@ -359,6 +361,7 @@ class Cliconf(CliconfBase):
             check_all=check_all,
         )
 
+    # Return the running mode: WORKING OR CERTIFIED
     def check_running_directory(self):
         reply = self.get(command="show running-directory")
         data = to_text(reply, errors="surrogate_or_strict").strip()
@@ -368,6 +371,7 @@ class Cliconf(CliconfBase):
         else:
             return None
 
+    # Save configuration and raise error if configuration not synchronize.
     def write_memory(self):
         reply = self.get(command="write memory flash-synchro")
         reply = self.get(command="show running-directory")
@@ -378,6 +382,7 @@ class Cliconf(CliconfBase):
         else:
             return True
 
+    # Return the basic information about the device.  Model / Version and Up time
     def get_device_info(self):
         if not self._device_info:
             device_info = {}
@@ -489,7 +494,7 @@ class Cliconf(CliconfBase):
         with defaults.
         :return: valid default filter
         """
-        out = self.get("show running-config ?")
+        out = self.get("show configuration snapshot")
         out = to_text(out, errors="surrogate_then_replace")
 
         commands = set()
@@ -502,23 +507,23 @@ class Cliconf(CliconfBase):
         else:
             return "full"
 
-    def set_cli_prompt_context(self):
-        """
-        Make sure we are in the operational cli mode
-        :return: None
-        """
-        if self._connection.connected:
-            out = self._connection.get_prompt()
+    # def set_cli_prompt_context(self):
+    #     """
+    #     Make sure we are in the operational cli mode
+    #     :return: None
+    #     """
+    #     if self._connection.connected:
+    #         out = self._connection.get_prompt()
 
-            if out is None:
-                raise AnsibleConnectionFailure(
-                    message="cli prompt is not identified from the last received"
-                    " response window: %s" % self._connection._last_recv_window,
-                )
+    #         if out is None:
+    #             raise AnsibleConnectionFailure(
+    #                 message="cli prompt is not identified from the last received"
+    #                 " response window: %s" % self._connection._last_recv_window,
+    #             )
 
-            if re.search(r"config.*\)#", to_text(out, errors="surrogate_then_replace").strip()):
-                self._connection.queue_message("vvvv", "wrong context, sending end to device")
-                self._connection.send_command("end")
+    #         if re.search(r"config.*\)#", to_text(out, errors="surrogate_then_replace").strip()):
+    #             self._connection.queue_message("vvvv", "wrong context, sending end to device")
+    #             self._connection.send_command("end")
 
     def _extract_banners(self, config):
         banners = {}
