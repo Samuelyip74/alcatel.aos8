@@ -159,14 +159,33 @@ parsed:
     This output will always be in the same format as the
     module argspec.
 """
-
+import time
+from ansible.module_utils._text import to_text
 from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.parsing import (
+    Conditional,
+)
+from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import (
+    to_lines,
+    transform_commands,
+)
 from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.command.command import (
     CommandArgs,
 )
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.config.command.command import (
-    Command,
-)
+
+from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.aos8 import run_commands
+
+def parse_commands(module, warnings):
+    commands = transform_commands(module)
+    if module.check_mode:
+        for item in list(commands):
+            if not item["command"].startswith("show"):
+                warnings.append(
+                    "Only show commands are supported when using check mode, not executing %s"
+                    % item["command"],
+                )
+                commands.remove(item)
+    return commands
 
 
 def main():
@@ -177,20 +196,38 @@ def main():
     """
     module = AnsibleModule(
         argument_spec=CommandArgs.argument_spec,
-        mutually_exclusive=[["config", "running_config"]],
-        required_if=[
-            ["state", "merged", ["config"]],
-            ["state", "replaced", ["config"]],
-            ["state", "overridden", ["config"]],
-            ["state", "rendered", ["config"]],
-            ["state", "parsed", ["running_config"]],
-        ],
         supports_check_mode=True,
-    )
-
-    result = Command(module).execute_module()
+    ) 
+    warnings = list()
+    result = {"changed": False, "warnings": warnings}
+    commands = parse_commands(module, warnings)
+    wait_for = module.params["wait_for"] or list()
+    conditionals = []
+    try:
+        conditionals = [Conditional(c) for c in wait_for]
+    except AttributeError as exc:
+        module.fail_json(msg=to_text(exc))
+    retries = module.params["retries"]
+    interval = module.params["interval"]
+    match = module.params["match"]
+    while retries >= 0:
+        responses = run_commands(module, commands)
+        for item in list(conditionals):
+            if item(responses):
+                if match == "any":
+                    conditionals = list()
+                    break
+                conditionals.remove(item)
+        if not conditionals:
+            break
+        time.sleep(interval)
+        retries -= 1
+    if conditionals:
+        failed_conditions = [item.raw for item in conditionals]
+        msg = "One or more conditional statements have not been satisfied"
+        module.fail_json(msg=msg, failed_conditions=failed_conditions)
+    result.update({"stdout": responses, "stdout_lines": list(to_lines(responses))})
     module.exit_json(**result)
-
 
 if __name__ == "__main__":
     main()
