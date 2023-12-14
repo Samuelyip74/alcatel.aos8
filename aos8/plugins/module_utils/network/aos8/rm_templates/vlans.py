@@ -32,7 +32,7 @@ class VlansTemplate(NetworkTemplate):
             'name': 'vlan_id',
             'getval': re.compile(
                 r'''
-              ^(?P<vlan_id>[\d]+).*(?P<type>std|spb)\s*(?P<admin>Ena|Dis)\s*(?P<oper>Ena|Dis)\s*(?P<ip>Ena|Dis)\s*(?P<mtu>[\d]+)\s*(?P<name>.*)$
+              ^(?P<vlan_id>[\d]+).*(?P<type>std)\s*(?P<admin>Ena|Dis)\s*(?P<oper>Ena|Dis)\s*(?P<ip>Ena|Dis)\s*(?P<mtu>[\d]+)\s*(?P<name>.*)$
               ''', re.VERBOSE,
             ),
             'setval': 'vlan {{ vlan_id }} admin-state {{ admin }} name {{ name }} ',

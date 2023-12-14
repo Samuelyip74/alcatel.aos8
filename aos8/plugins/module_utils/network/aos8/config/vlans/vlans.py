@@ -65,16 +65,14 @@ class Vlans(ResourceModule):
         """Generate configuration commands to send based on
         want, have and desired state.
         """
-        wantd = {entry["name"]: entry for entry in self.want}
-        haved = {entry["name"]: entry for entry in self.have}
 
-        for each in wantd, haved:
-            self.normalize_interface_names(each)
+        wantd = {entry["vlan_id"]: entry for entry in self.want}
+        haved = {entry["vlan_id"]: entry for entry in self.have}
 
         # if state is merged, merge want onto have and then compare
         if self.state == "merged":
             wantd = dict_merge(haved, wantd)
-
+          
         # if state is deleted, empty out wantd and set haved to wantd
         if self.state in ["deleted", "purged"]:
             haved = {k: v for k, v in iteritems(haved) if k in wantd or not wantd}
@@ -97,38 +95,37 @@ class Vlans(ResourceModule):
         """Leverages the base class `compare()` method and
         populates the list of commands to be run by comparing
         the `want` and `have` data with the `parsers` defined
-        for the Interfaces network resource.
+        for the VLAN network resource.
         """
-        begin = len(self.commands)
+        # file1 = open('/home/sadmin/myfile.txt','a')
+        # file1.write(str(want))
+        # file1.write(str(have))
+        # begin = len(self.commands)
+
         self.compare(parsers=self.parsers, want=want, have=have)
-        if want.get("enabled") != have.get("enabled"):
-            if want.get("enabled"):
-                self.addcmd(want, "enabled", True)
-            else:
-                if want:
-                    self.addcmd(want, "enabled", False)
-                elif have.get("enabled"):
-                    # handles deleted as want be blank and only
-                    # negates if no shutdown
-                    self.addcmd(have, "enabled", False)
-        if want.get("mode") != have.get("mode"):
-            if want.get("mode") == "layer3":
-                self.addcmd(want, "mode", True)
-            else:
-                if want:
-                    self.addcmd(want, "mode", False)
-                elif have.get("mode"):  # can oly have layer2 as switchport no show cli
-                    # handles deleted as want be blank and only
-                    self.addcmd(have, "mode", False)
-        if len(self.commands) != begin:
-            self.commands.insert(begin, self._tmplt.render(want or have, "interface", False))
+        # if want.get("enabled") != have.get("enabled"):
+        #     if want.get("enabled"):
+        #         self.addcmd(want, "enabled", True)
+        #     else:
+        #         if want:
+        #             self.addcmd(want, "enabled", False)
+        #         elif have.get("enabled"):
+        #             # handles deleted as want be blank and only
+        #             # negates if no shutdown
+        #             self.addcmd(have, "enabled", False)
+        # if want.get("mode") != have.get("mode"):
+        #     if want.get("mode") == "layer3":
+        #         self.addcmd(want, "mode", True)
+        #     else:
+        #         if want:
+        #             self.addcmd(want, "mode", False)
+        #         elif have.get("mode"):  # can oly have layer2 as switchport no show cli
+        #             # handles deleted as want be blank and only
+        #             self.addcmd(have, "mode", False)
+        # if len(self.commands) != begin:
+        #     self.commands.insert(begin, self._tmplt.render(want or have, "vlan", False))
+        # file1.close()              
 
     def purge(self, have):
         """Handle operation for purged state"""
-        self.commands.append(self._tmplt.render(have, "interface", True))
-
-    def normalize_interface_names(self, param):
-        if param:
-            for _k, val in iteritems(param):
-                val["name"] = normalize_interface(val["name"])
-        return param
+        self.commands.append(self._tmplt.render(have, "vlan", True))

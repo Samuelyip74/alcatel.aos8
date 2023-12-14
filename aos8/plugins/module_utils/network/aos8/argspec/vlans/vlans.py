@@ -42,8 +42,8 @@ class VlansArgs(object):
         "config": {
             "elements": "dict",
             "options": {
-                "name": {"type": "str"},
                 "vlan_id": {"required": True, "type": "int"},
+                "name": {"type": "str"},
                 "mtu": {"type": "int", "default": 1500},
                 "admin": {"type": "str", "choices": ["Ena", "Dis"], "default": "enable"},
             },
