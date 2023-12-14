@@ -971,7 +971,7 @@ def main():
         mutually_exclusive=mutually_exclusive,
         supports_check_mode=True,
     )
-    result = Interfaces(module).execute_module()
+    result = Vlans(module).execute_module()
     module.exit_json(**result)
 
 

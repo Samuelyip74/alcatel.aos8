@@ -58,7 +58,7 @@ class Vlans(ResourceModule):
         """
         if self.state not in ["parsed", "gathered"]:
             self.generate_commands()
-            # self.run_commands()
+            self.run_commands()
         return self.result
 
     def generate_commands(self):
@@ -127,8 +127,8 @@ class Vlans(ResourceModule):
         """Handle operation for purged state"""
         self.commands.append(self._tmplt.render(have, "interface", True))
 
-    # def normalize_interface_names(self, param):
-    #     if param:
-    #         for _k, val in iteritems(param):
-    #             val["name"] = normalize_interface(val["name"])
-    #     return param
+    def normalize_interface_names(self, param):
+        if param:
+            for _k, val in iteritems(param):
+                val["name"] = normalize_interface(val["name"])
+        return param

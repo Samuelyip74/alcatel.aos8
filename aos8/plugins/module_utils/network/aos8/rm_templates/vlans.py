@@ -35,7 +35,7 @@ class VlansTemplate(NetworkTemplate):
               ^(?P<vlan_id>[\d]+).*(?P<type>std|spb)\s*(?P<admin>Ena|Dis)\s*(?P<oper>Ena|Dis)\s*(?P<ip>Ena|Dis)\s*(?P<mtu>[\d]+)\s*(?P<name>.*)$
               ''', re.VERBOSE,
             ),
-            'setval': 'vlan {{ vlan_id }}',
+            'setval': 'vlan {{ vlan_id }} admin-state {{ admin }} name {{ name }} ',
             'result': {
                 '{{ vlan_id }}': {
                     'vlan_id': '{{ vlan_id }}',
@@ -45,106 +45,6 @@ class VlansTemplate(NetworkTemplate):
                 },
             },
             'shared': True,
-        },
-        {
-            "name": "description",
-            "getval": re.compile(
-                r"""
-                \s+description\s(?P<description>.+$)
-                $""", re.VERBOSE,
-            ),
-            "setval": "description {{ description }}",
-            "result": {
-                '{{ name }}': {
-                    'description': '{{ description }}',
-                },
-            },
-        },
-        {
-            "name": "enabled",
-            "getval": re.compile(
-                r"""
-                (?P<negate>\sno)?
-                (?P<shutdown>\sshutdown)
-                $""", re.VERBOSE,
-            ),
-            "setval": "shutdown",
-            "result": {
-                '{{ name }}': {
-                    'enabled': "{{ False if shutdown is defined and negate is not defined else True }}",
-                },
-            },
-        },
-        {  # only applicable for switches
-            "name": "mode",
-            "getval": re.compile(
-                r"""
-                (?P<negate>\sno)?
-                (?P<switchport>\sswitchport)
-                $""", re.VERBOSE,
-            ),
-            "setval": "switchport",
-            "result": {
-                '{{ name }}': {
-                    'mode': "{{ 'layer2' if switchport is defined and negate is not defined else 'layer3' }}",
-                },
-            },
-        },
-        {
-            "name": "speed",
-            "getval": re.compile(
-                r"""
-                \s+speed\s(?P<speed>.+$)
-                $""", re.VERBOSE,
-            ),
-            "setval": "speed {{ speed|string }}",
-            "result": {
-                '{{ name }}': {
-                    'speed': '{{ speed }}',
-                },
-            },
-        },
-        {
-            "name": "mtu",
-            "getval": re.compile(
-                r"""
-                \s+mtu\s(?P<mtu>.+$)
-                $""", re.VERBOSE,
-            ),
-            "setval": "mtu {{ mtu|string }}",
-            "result": {
-                '{{ name }}': {
-                    'mtu': '{{ mtu }}',
-                },
-            },
-        },
-        {
-            "name": "duplex",
-            "getval": re.compile(
-                r"""
-                \s+duplex\s(?P<duplex>full|half|auto)
-                $""", re.VERBOSE,
-            ),
-            "setval": "duplex {{ duplex }}",
-            "result": {
-                '{{ name }}': {
-                    'duplex': '{{ duplex }}',
-                },
-            },
-        },
-        {
-            "name": "template",
-            "getval": re.compile(
-                r"""
-                \s+source\stemplate\s(?P<template>.+$)
-                """, re.VERBOSE,
-            ),
-            "setval": "source template {{ template }}",
-            "result": {
-                '{{ name }}': {
-                    'template': '{{ template }}',
-                },
-            },
         },
     ]
     # fmt: on
