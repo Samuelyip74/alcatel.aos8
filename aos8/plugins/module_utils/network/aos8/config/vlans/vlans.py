@@ -27,7 +27,7 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.u
 )
 
 from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.facts import Facts
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.rm_templates.interfaces import (
+from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.rm_templates.vlans import (
     VlansTemplate,
 )
 # from ansible_collections.alcatel.aos8.plugins.module_utils.network.ios.utils.utils import (
@@ -35,7 +35,7 @@ from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.rm_templ
 # )
 
 
-class Interfaces(ResourceModule):
+class Vlans(ResourceModule):
     """
     The aos8_vlans config class
     """
@@ -46,9 +46,9 @@ class Interfaces(ResourceModule):
             facts_module=Facts(module),
             module=module,
             resource="vlans",
-            tmplt=InterfacesTemplate(),
+            tmplt=VlansTemplate(),
         )
-        self.parsers = ["vlan_id", "type", "admin", "oper", "mtu" , "name"]
+        self.parsers = ["vlan_id", "name", "admin", "mtu" ]
 
     def execute_module(self):
         """Execute the module
@@ -58,7 +58,7 @@ class Interfaces(ResourceModule):
         """
         if self.state not in ["parsed", "gathered"]:
             self.generate_commands()
-            self.run_commands()
+            # self.run_commands()
         return self.result
 
     def generate_commands(self):

@@ -82,6 +82,9 @@ from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.fa
 from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.hostname.hostname import (
     HostnameArgs,
 )
+from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.vlans.vlans import (
+    VlansArgs,
+)
 
 def main():
     """

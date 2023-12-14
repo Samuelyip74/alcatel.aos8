@@ -4,6 +4,7 @@
 # (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+import json
 
 
 __metaclass__ = type
@@ -18,10 +19,10 @@ based on the configuration.
 
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common import utils
 
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.interfaces.interfaces import (
+from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.vlans.vlans import (
     VlansArgs,
 )
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.rm_templates.interfaces import (
+from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.rm_templates.vlans import (
     VlansTemplate,
 )
 
@@ -31,10 +32,10 @@ class VlansFacts(object):
 
     def __init__(self, module):
         self._module = module
-        self.argument_spec = InterfacesArgs.argument_spec
+        self.argument_spec = VlansArgs.argument_spec
 
-    def get_interfaces_data(self, connection):
-        return connection.get("show configurtion snapshot vlan")
+    def get_vlans_data(self, connection):
+        return connection.get("show vlan")
 
     def populate_facts(self, connection, ansible_facts, data=None):
         """Populate the facts for VLANs network resource
@@ -47,16 +48,15 @@ class VlansFacts(object):
         :returns: facts
         """
         if not data:
-            data = self.get_interfaces_data(connection)
+            data = self.get_vlans_data(connection)
 
         # parse native config using the Interfaces template
-        interfaces_parser = InterfacesTemplate(lines=data.splitlines(), module=self._module)
+        interfaces_parser  = VlansTemplate(lines=data.splitlines(), module=self._module)
         objs = sorted(list(interfaces_parser.parse().values()), key=lambda k, sk="name": k[sk])
-
         ansible_facts["ansible_network_resources"].pop("vlans", None)
         facts = {"vlans": []}
         params = utils.remove_empties(
-            interfaces_parser.validate_config(self.argument_spec, {"config": objs}, redact=True),
+            interfaces_parser .validate_config(self.argument_spec, {"config": objs}, redact=True),
         )
 
         facts["vlans"] = params["config"]
