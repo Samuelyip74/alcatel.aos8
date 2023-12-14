@@ -44,14 +44,8 @@ class VlansFacts(object):
 
         self.generated_spec = utils.generate_dict(facts_argument_spec)
 
-    def get_vlans_data(self, connection, configuration):
-        """Checks device is L2/L3 and returns
-        facts gracefully. Does not fail module.
-        """
-        if configuration:
-            cmd = "show configuration snapshot vlan"
-        else:
-            cmd = "show vlan"
+    def get_vlans_data(self, connection):
+        cmd = "show vlan"
         return connection.get(cmd)
 
     def populate_facts(self, connection, ansible_facts, data=None):
@@ -62,17 +56,11 @@ class VlansFacts(object):
         :rtype: dictionary
         :returns: facts
         """
-        # configuration = self._module.params["configuration"]
-        configuration = False
-
         objs = []
 
         if not data:
-            data = self.get_vlans_data(connection, configuration)
-        if not configuration:
+            data = self.get_vlans_data(connection)
             objs = self.parse_vlan(data)
-        else:
-            objs = self.parse_vlan_config(data)
 
         facts = {}
         if objs:

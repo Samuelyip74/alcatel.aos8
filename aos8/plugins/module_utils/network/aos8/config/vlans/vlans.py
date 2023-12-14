@@ -69,10 +69,6 @@ class Vlans(ConfigBase):
         warnings = list()
         self.have_now = list()
         self.configuration = self._module.params["configuration"]
-        if not self.configuration:
-            self.vlan_parent = "vlan {0}"
-        else:
-            self.vlan_parent = "vlan configuration {0}"
         if self.state in self.ACTION_STATES:
             existing_vlans_facts = self.get_vlans_facts()
         else:
