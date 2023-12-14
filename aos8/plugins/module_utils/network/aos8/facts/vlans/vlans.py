@@ -22,7 +22,7 @@ from copy import deepcopy
 
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common import utils
 
-from ansible_collections.cisco.ios.plugins.module_utils.network.ios.argspec.vlans.vlans import (
+from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.vlans.vlans import (
     VlansArgs,
 )
 
@@ -195,14 +195,20 @@ class VlansFacts(object):
             match = re.match("^(?P<vlan_id>[\d]+).*(?P<type>std)\s*(?P<admin>Ena|Dis)\s*(?P<oper>Ena|Dis)\s*(?P<ip>Ena|Dis)\s*(?P<mtu>[\d]+)\s*(?P<name>.*)$", conf)
             if match:
                 if match.group('admin') == 'Ena':
-                    admin_state = "active"
+                    admin_state = "enable"
                 else:
-                    admin_state = "suspend"
+                    admin_state = "disable"
+
+                if match.group('oper') == 'Ena':
+                    operational_state = "enable"
+                else:
+                    operational_state = "disable"                    
                 vlan_obj = {
                         'vlan_id' : match.group('vlan_id'),
                         'name' : match.group('name').strip(), 
                         'mtu' : match.group('mtu'), 
-                        'state': admin_state,
+                        'admin': admin_state,
+                        'operational_state' : operational_state,
                 }
                 objs.append(vlan_obj)
 
