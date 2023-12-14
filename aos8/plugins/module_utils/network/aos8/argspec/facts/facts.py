@@ -22,7 +22,6 @@ class FactsArgs(object):  # pylint: disable=R0903
     choices = [
         'all',
         'hostname',
-        'vlans',
     ]
 
     argument_spec = {
