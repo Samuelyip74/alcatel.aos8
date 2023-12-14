@@ -13,11 +13,13 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.f
     FactsBase,
 )
 from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.hostname.hostname import HostnameFacts
+from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.facts.vlans.vlans import VlansFacts
 
 
 FACT_LEGACY_SUBSETS = {}
 FACT_RESOURCE_SUBSETS = dict(
     hostname=HostnameFacts,
+    vlans=VlansFacts,
 )
 
 
