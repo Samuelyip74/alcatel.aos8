@@ -195,14 +195,14 @@ class VlansFacts(object):
             match = re.match("^(?P<vlan_id>[\d]+).*(?P<type>std)\s*(?P<admin>Ena|Dis)\s*(?P<oper>Ena|Dis)\s*(?P<ip>Ena|Dis)\s*(?P<mtu>[\d]+)\s*(?P<name>.*)$", conf)
             if match:
                 if match.group('admin') == 'Ena':
-                    admin_state = "enable"
+                    admin_state = "active"
                 else:
-                    admin_state = "disable"
+                    admin_state = "suspend"
                 vlan_obj = {
                         'vlan_id' : match.group('vlan_id'),
                         'name' : match.group('name').strip(), 
                         'mtu' : match.group('mtu'), 
-                        'admin': admin_state,
+                        'state': admin_state,
                 }
                 objs.append(vlan_obj)
 

@@ -46,7 +46,6 @@ class VlansArgs(object):
                 "name": {"type": "str"},
                 "vlan_id": {"required": True, "type": "int"},
                 "mtu": {"type": "int"},
-                "admin": {"type": "str", "choices": ["enable", "disable"]},
                 "state": {"type": "str", "choices": ["active", "suspend"]},
                 "shutdown": {"type": "str", "choices": ["enable", "disabled"]},
             },
