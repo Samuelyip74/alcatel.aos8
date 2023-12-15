@@ -210,7 +210,36 @@ EXAMPLES = """
 #     }
 # }
 
-# Using overridden
+# # Using overridden
+
+# # Before state:
+# # -------------
+# #
+# # ACSW01-> show vlan
+# #  vlan    type   admin   oper    ip    mtu          name
+# # ------+-------+-------+------+------+------+------------------
+# # 1      std       Ena     Ena   Ena    1500    MGNT
+# # 33     std       Ena     Dis   Ena    1280    Vlan_33
+# # 99     std       Ena     Dis   Dis    1500    Vlan_99
+
+# - name: Override device configuration of all VLANs with provided configuration
+#   alcatel.aos8.aos8_vlans:
+#     config:
+#       - vlan_id: 33
+#         name: Vlan_33
+#         mtu: 1280
+#     state: overridden
+
+# # After state:
+# # ------------
+# #
+# # ACSW01-> show vlan
+# #  vlan    type   admin   oper    ip    mtu          name
+# # ------+-------+-------+------+------+------+------------------
+# # 1      std       Ena     Ena   Ena    1500    MGNT
+# # 33     std       Ena     Dis   Ena    1280    Vlan_33
+
+# Using replaced
 
 # Before state:
 # -------------
@@ -220,15 +249,18 @@ EXAMPLES = """
 # ------+-------+-------+------+------+------+------------------
 # 1      std       Ena     Ena   Ena    1500    MGNT
 # 33     std       Ena     Dis   Ena    1280    Vlan_33
-# 99     std       Ena     Dis   Dis    1500    Vlan_99
 
-- name: Override device configuration of all VLANs with provided configuration
+- name: Replaces device configuration of listed VLANs with provided configuration
   alcatel.aos8.aos8_vlans:
     config:
       - vlan_id: 33
-        name: Vlan_33
-        mtu: 1000
-    state: overridden
+        name: "Vlan 33"
+        admin: enable
+        mtu: 1500
+      - vlan_id: 99
+        name: "Vlan 99"
+        admin: enable
+    state: replaced
 
 # After state:
 # ------------
@@ -237,106 +269,87 @@ EXAMPLES = """
 #  vlan    type   admin   oper    ip    mtu          name
 # ------+-------+-------+------+------+------+------------------
 # 1      std       Ena     Ena   Ena    1500    MGNT
-# 33     std       Ena     Dis   Ena    1000    Vlan_33
+# 33     std       Ena     Dis   Ena    1280    Vlan_33
+# 99     std       Ena     Dis   Ena    1500    Vlan_99
 
-# Using replaced
-
-# Before state:
-# -------------
-#
-# vaos8_l2#show vlan
-# VLAN Name                             Status    Ports
-# ---- -------------------------------- --------- -------------------------------
-# 1    default                          active    Gi0/1, Gi0/2
-# 10   vlan_10                          active
-# 20   vlan_20                          act/lshut
-# 30   vlan_30                          sus/lshut
-# 1002 fddi-default                     act/unsup
-# 1003 token-ring-default               act/unsup
-# 1004 fddinet-default                  act/unsup
-# 1005 trnet-default                    act/unsup
-#
-# VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
-# ---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
-# 1    enet  100001     1500  -      -      -        -    -        0      0
-# 10   enet  100010     1500  -      -      -        -    -        0      0
-# 20   enet  100020     610   -      -      -        -    -        0      0
-# 30   enet  100030     1500  -      -      -        -    -        0      0
-# 1002 fddi  101002     1500  -      -      -        -    -        0      0
-# 1003 tr    101003     1500  -      -      -        -    -        0      0
-# 1004 fdnet 101004     1500  -      -      -        ieee -        0      0
-# 1005 trnet 101005     1500  -      -      -        ibm  -        0      0
-#
-# Remote SPAN VLANs
-# ------------------------------------------------------------------------------
-# 10
-
-- name: Replaces device configuration of listed VLANs with provided configuration
-  alcatel.aos8.aos8_vlans:
-    config:
-      - vlan_id: 20
-        name: Test_VLAN20
-        mtu: 700
-        shutdown: disabled
-      - vlan_id: 50
-        name: pvlan-isolated
-        private_vlan:
-          type: isolated
-      - vlan_id: 60
-        name: pvlan-community
-        private_vlan:
-          type: community
-      - vlan_id: 70
-        name: pvlan-primary
-        private_vlan:
-          type: primary
-          associated:
-            - 50
-            - 60
-
-    state: replaced
-
-# After state:
-# ------------
-#
-# vaos8_l2#sh vlan
-# VLAN Name                             Status    Ports
-# ---- -------------------------------- --------- -------------------------------
-# 1    default                          active    Gi0/0, Gi0/1, Gi0/2, Gi0/3
-# 10   Vlan_10                          active
-# 20   Test_VLAN20                      active
-# 50   pvlan-isolated                   active
-# 60   pvlan-community                  active
-# 70   pvlan-primary                    active
-# 1002 fddi-default                     act/unsup
-# 1003 token-ring-default               act/unsup
-# 1004 fddinet-default                  act/unsup
-# 1005 trnet-default                    act/unsup
-#
-# VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
-# ---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
-# 1    enet  100001     1500  -      -      -        -    -        0      0
-# 10   enet  100010     1000  -      -      -        -    -        0      0
-# 20   enet  100020     700   -      -      -        -    -        0      0
-# 50   enet  100050     1500  -      -      -        -    -        0      0
-# 60   enet  100051     1500  -      -      -        -    -        0      0
-# 70   enet  100059     1500  -      -      -        -    -        0      0
-# 1002 fddi  101002     1500  -      -      -        -    -        0      0
-# 1003 tr    101003     1500  -      -      -        -    -        0      0
-# 1004 fdnet 101004     1500  -      -      -        ieee -        0      0
-#
-# VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
-# ---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
-# 1005 trnet 101005     1500  -      -      -        ibm  -        0      0
-#
-# Remote SPAN VLANs
-# ------------------------------------------------------------------------------
-#
-#
-# Primary Secondary Type              Ports
-# ------- --------- ----------------- ------------------------------------------
-# 70      50        isolated
-# 70      60        community
+#     "after": [
+#         {
+#             "admin": "enable",
+#             "mtu": 1500,
+#             "name": "MGNT",
+#             "operational_state": "enable",
+#             "vlan_id": 1
+#         },
+#         {
+#             "admin": "enable",
+#             "mtu": 1500,
+#             "name": "Vlan 33",
+#             "operational_state": "disable",
+#             "vlan_id": 33
+#         },
+#         {
+#             "admin": "enable",
+#             "mtu": 1500,
+#             "name": "Vlan 99",
+#             "operational_state": "disable",
+#             "vlan_id": 99
+#         },
+#         {
+#             "admin": "enable",
+#             "mtu": 1500,
+#             "name": "Ucopia",
+#             "operational_state": "enable",
+#             "vlan_id": 200
+#         },
+#     ],
+#     "before": [
+#         {
+#             "admin": "enable",
+#             "mtu": 1500,
+#             "name": "MGNT",
+#             "operational_state": "enable",
+#             "vlan_id": 1
+#         },
+#         {
+#             "admin": "enable",
+#             "mtu": 1280,
+#             "name": "Vlan 33",
+#             "operational_state": "disable",
+#             "vlan_id": 33
+#         },
+#     ],
+#     "changed": true,
+#     "commands": [
+#         "vlan 33 name \"Vlan 33\"",
+#         "vlan 33 admin-state enable",
+#         "vlan 33 mtu-ip 1500",
+#         "vlan 99 name \"Vlan 99\"",
+#         "vlan 99 admin-state enable",
+#         "vlan 99 mtu-ip 1500"
+#     ],
+#     "invocation": {
+#         "module_args": {
+#             "config": [
+#                 {
+#                     "admin": "enable",
+#                     "mtu": 1500,
+#                     "name": "Vlan 33",
+#                     "operational_state": null,
+#                     "vlan_id": 33
+#                 },
+#                 {
+#                     "admin": "enable",
+#                     "mtu": 1500,
+#                     "name": "Vlan 99",
+#                     "operational_state": null,
+#                     "vlan_id": 99
+#                 }
+#             ],
+#             "running_config": null,
+#             "state": "replaced"
+#         }
+#     }
+# }
 
 # Using deleted
 
