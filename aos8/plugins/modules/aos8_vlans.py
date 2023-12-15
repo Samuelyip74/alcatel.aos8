@@ -25,18 +25,15 @@ __metaclass__ = type
 
 DOCUMENTATION = """
 module: aos8_vlans
-short_description: Resource module to configure VLANs.
+short_description: Resource module to configure VLANs on AOS8 devices
 description:
   This module provides declarative management of VLANs on Cisco aos8 network
   devices.
 version_added: 1.0.0
-author: Sumit Jaiswal (@justjais)
+author: Samuel Yip (@samuelyip)
 notes:
-  - Tested against Cisco aos8l2 device with Version 15.2 on VIRL.
-  - Starting from v2.5.0, this module will fail when run against Cisco aos8 devices that do
-    not support VLANs. The offline states (C(rendered) and C(parsed)) will work as expected.
+  - Tested against Alcatel-Lucent AOS8 OmniSwitch with Version 8.9.221.R03 GA.
   - This module works with connection C(network_cli).
-    See U(https://docs.ansible.com/ansible/latest/network/user_guide/platform_aos8.html)
 options:
   config:
     description: A dictionary of VLANs options
@@ -59,56 +56,13 @@ options:
           - VLAN Maximum Transmission Unit.
           - Refer to vendor documentation for valid values.
         type: int
-      state:
+      admin:
         description:
-          - Operational state of the VLAN
+          - Administration state of the VLAN
         type: str
         choices:
-          - active
-          - suspend
-      remote_span:
-        description:
-          - Configure as Remote SPAN VLAN
-        type: bool
-      shutdown:
-        description:
-          - Shutdown VLAN switching.
-        type: str
-        choices:
-          - enabled
-          - disabled
-      private_vlan:
-        description:
-          - Options for private vlan configuration.
-        type: dict
-        suboptions:
-          type:
-            description:
-              - Private VLAN type
-            type: str
-            choices:
-              - primary
-              - isolated
-              - community
-          associated:
-            description:
-              - "List of private VLANs associated with the primary . Only works with `type: primary`."
-            type: list
-            elements: int
-      member:
-        description:
-          - Members of VLAN
-        type: dict
-        suboptions:
-          vni:
-            description:
-              - VXLAN vni
-            type: int
-            required: true
-          evi:
-            description:
-              - Ethernet Virtual Private Network (EVPN)
-            type: int
+          - enable
+          - disable
   running_config:
     description:
       - This option is used only with state I(parsed).
@@ -118,10 +72,6 @@ options:
         transforms it into Ansible structured data as per the resource module's argspec
         and the value is then returned in the I(parsed) key within the result.
     type: str
-  configuration:
-    description:
-      When set to true, deals with vlan configuration CLIs
-    type: bool
   state:
     description:
       - The state the configuration should be left in
