@@ -295,7 +295,7 @@ class Vlans(ConfigBase):
         return commands
 
     def _clear_config(self, want, have):
-        # Delete the interface config based on the want and have config
+        # Delete the vlan config based on the want and have config
         commands = []
         vlan = self.vlan_parent.format(have.get("vlan_id"))
 
@@ -321,58 +321,3 @@ class Vlans(ConfigBase):
             if have.get("state") != want.get("state") and want.get("state"):
                 self.remove_command_from_config_list(vlan, "state", commands)
         return commands
-
-    def _remove_vlan_vni_evi_mapping(self, want_dict):
-        commands = []
-        have_copy = self.have_now.copy()
-        vlan = want_dict["vlan_id"]
-        for vlan_dict in have_copy:
-            if vlan_dict["vlan_id"] == vlan:
-                if "member" in vlan_dict:
-                    commands.extend(
-                        [
-                            self.vlan_parent.format(vlan),
-                            self._get_member_cmds(
-                                vlan_dict.get("member", {}),
-                                prefix="no",
-                            ),
-                        ],
-                    )
-                    vlan_dict.pop("member")
-            if vlan_dict["vlan_id"] != vlan:
-                delete_member = False
-                have_vni = vlan_dict.get("member", {}).get("vni")
-                have_evi = vlan_dict.get("member", {}).get("evi")
-                if have_vni and (have_vni == want_dict["member"].get("vni")):
-                    delete_member = True
-                if have_evi and (have_evi == want_dict["member"].get("evi")):
-                    delete_member = True
-                if delete_member:
-                    commands.extend(
-                        [
-                            self.vlan_parent.format(vlan_dict["vlan_id"]),
-                            self._get_member_cmds(
-                                vlan_dict.get("member", {}),
-                                prefix="no",
-                            ),
-                        ],
-                    )
-                    self.have_now.remove(vlan_dict)
-        return commands
-
-    def _get_member_cmds(self, member_dict, prefix=""):
-        cmd = ""
-        if prefix:
-            prefix = prefix + " "
-        member_vni = member_dict.get("vni")
-        member_evi = member_dict.get("evi")
-
-        if member_evi:
-            cmd = prefix + "member evpn-instance {0} vni {1}".format(
-                member_evi,
-                member_vni,
-            )
-        elif member_vni:
-            cmd = prefix + "member vni {0}".format(member_vni)
-
-        return cmd
