@@ -356,185 +356,90 @@ EXAMPLES = """
 # Before state:
 # -------------
 #
-# vaos8_l2#show vlan
-# VLAN Name                             Status    Ports
-# ---- -------------------------------- --------- -------------------------------
-# 1    default                          active    Gi0/1, Gi0/2
-# 10   vlan_10                          active
-# 20   vlan_20                          act/lshut
-# 30   vlan_30                          sus/lshut
-# 1002 fddi-default                     act/unsup
-# 1003 token-ring-default               act/unsup
-# 1004 fddinet-default                  act/unsup
-# 1005 trnet-default                    act/unsup
-#
-# VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
-# ---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
-# 1    enet  100001     1500  -      -      -        -    -        0      0
-# 10   enet  100010     1500  -      -      -        -    -        0      0
-# 20   enet  100020     610   -      -      -        -    -        0      0
-# 30   enet  100030     1500  -      -      -        -    -        0      0
-# 1002 fddi  101002     1500  -      -      -        -    -        0      0
-# 1003 tr    101003     1500  -      -      -        -    -        0      0
-# 1004 fdnet 101004     1500  -      -      -        ieee -        0      0
-# 1005 trnet 101005     1500  -      -      -        ibm  -        0      0
-#
-# Remote SPAN VLANs
-# ------------------------------------------------------------------------------
-# 10
+# ACSW01-> show vlan
+#  vlan    type   admin   oper    ip    mtu          name
+# ------+-------+-------+------+------+------+------------------
+# 1      std       Ena     Ena   Ena    1500    MGNT
+# 33     std       Ena     Dis   Ena    1280    Vlan_33
+# 99     std       Ena     Dis   Ena    1500    Vlan_99
 
-- name: Delete attributes of given VLANs
-  alcatel.aos8.aos8_vlans:
-    config:
-      - vlan_id: 10
-      - vlan_id: 20
-    state: deleted
+  - name: Run VLAN resource module with state deleted
+    alcatel.aos8.aos8_vlans:
+      config:
+        - vlan_id: 33
+        - vlan_id: 99
+      state: deleted
+
 
 # After state:
 # -------------
 #
-# vaos8_l2#show vlan
-# VLAN Name                             Status    Ports
-# ---- -------------------------------- --------- -------------------------------
-# 1    default                          active    Gi0/1, Gi0/2
-# 30   vlan_30                          sus/lshut
-# 1002 fddi-default                     act/unsup
-# 1003 token-ring-default               act/unsup
-# 1004 fddinet-default                  act/unsup
-# 1005 trnet-default                    act/unsup
-#
-# VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
-# ---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
-# 1    enet  100001     1500  -      -      -        -    -        0      0
-# 30   enet  100030     1500  -      -      -        -    -        0      0
-# 1002 fddi  101002     1500  -      -      -        -    -        0      0
-# 1003 tr    101003     1500  -      -      -        -    -        0      0
-# 1004 fdnet 101004     1500  -      -      -        ieee -        0      0
-# 1005 trnet 101005     1500  -      -      -        ibm  -        0      0
+# ACSW01-> show vlan
+#  vlan    type   admin   oper    ip    mtu          name
+# ------+-------+-------+------+------+------+------------------
+# 1      std       Ena     Ena   Ena    1500    MGNT
 
-# Using deleted (configuration: True)
+#     "after": [
+#         {
+#             "admin": "enable",
+#             "mtu": 1500,
+#             "name": "MGNT",
+#             "operational_state": "enable",
+#             "vlan_id": 1
+#         },
+#     ],
+#     "before": [
+#         {
+#             "admin": "enable",
+#             "mtu": 1500,
+#             "name": "MGNT",
+#             "operational_state": "enable",
+#             "vlan_id": 1
+#         },
+#         {
+#             "admin": "enable",
+#             "mtu": 1280,
+#             "name": "Vlan 33",
+#             "operational_state": "disable",
+#             "vlan_id": 33
+#         },
+#         {
+#             "admin": "enable",
+#             "mtu": 1500,
+#             "name": "Vlan 99",
+#             "operational_state": "disable",
+#             "vlan_id": 99
+#         },
+#     ],
+#     "changed": true,
+#     "commands": [
+#         "no vlan 33",
+#         "no vlan 99"
+#     ],
+#     "invocation": {
+#         "module_args": {
+#             "config": [
+#                 {
+#                     "admin": "enable",
+#                     "mtu": 1500,
+#                     "name": null,
+#                     "operational_state": null,
+#                     "vlan_id": 33
+#                 },
+#                 {
+#                     "admin": "enable",
+#                     "mtu": 1500,
+#                     "name": null,
+#                     "operational_state": null,
+#                     "vlan_id": 99
+#                 }
+#             ],
+#             "running_config": null,
+#             "state": "deleted"
+#         }
+#     }
+# }
 
-# Before state:
-# -------------
-#
-# Leaf-01#show run nve | sec ^vlan configuration
-# vlan configuration 101
-#  member evpn-instance 101 vni 10101
-# vlan configuration 102
-#  member evpn-instance 102 vni 10102
-# vlan configuration 201
-#  member evpn-instance 201 vni 10201
-# vlan configuration 901
-#  member vni 50901
-
-- name: Delete attributes of given VLANs
-  alcatel.aos8.aos8_vlans:
-    config:
-      - vlan_id: 101
-    configuration: true
-    state: deleted
-
-# After state:
-# -------------
-#
-# Leaf-01#show run nve | sec ^vlan configuration
-# vlan configuration 102
-#  member evpn-instance 102 vni 10102
-# vlan configuration 201
-#  member evpn-instance 201 vni 10201
-# vlan configuration 901
-#  member vni 50901
-
-# Using Deleted without any config passed
-# "(NOTE: This will delete all of configured vlans attributes)"
-
-# Before state:
-# -------------
-#
-# vaos8_l2#show vlan
-# VLAN Name                             Status    Ports
-# ---- -------------------------------- --------- -------------------------------
-# 1    default                          active    Gi0/1, Gi0/2
-# 10   vlan_10                          active
-# 20   vlan_20                          act/lshut
-# 30   vlan_30                          sus/lshut
-# 1002 fddi-default                     act/unsup
-# 1003 token-ring-default               act/unsup
-# 1004 fddinet-default                  act/unsup
-# 1005 trnet-default                    act/unsup
-#
-# VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
-# ---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
-# 1    enet  100001     1500  -      -      -        -    -        0      0
-# 10   enet  100010     1500  -      -      -        -    -        0      0
-# 20   enet  100020     610   -      -      -        -    -        0      0
-# 30   enet  100030     1500  -      -      -        -    -        0      0
-# 1002 fddi  101002     1500  -      -      -        -    -        0      0
-# 1003 tr    101003     1500  -      -      -        -    -        0      0
-# 1004 fdnet 101004     1500  -      -      -        ieee -        0      0
-# 1005 trnet 101005     1500  -      -      -        ibm  -        0      0
-#
-# Remote SPAN VLANs
-# ------------------------------------------------------------------------------
-# 10
-
-- name: Delete attributes of ALL VLANs
-  alcatel.aos8.aos8_vlans:
-    state: deleted
-
-# After state:
-# -------------
-#
-# vaos8_l2#show vlan
-# VLAN Name                             Status    Ports
-# ---- -------------------------------- --------- -------------------------------
-# 1    default                          active    Gi0/1, Gi0/2
-# 1002 fddi-default                     act/unsup
-# 1003 token-ring-default               act/unsup
-# 1004 fddinet-default                  act/unsup
-# 1005 trnet-default                    act/unsup
-#
-# VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
-# ---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
-# 1    enet  100001     1500  -      -      -        -    -        0      0
-# 1002 fddi  101002     1500  -      -      -        -    -        0      0
-# 1003 tr    101003     1500  -      -      -        -    -        0      0
-# 1004 fdnet 101004     1500  -      -      -        ieee -        0      0
-# 1005 trnet 101005     1500  -      -      -        ibm  -        0      0
-
-# Using Deleted without any config passed (configuration: True)
-# "(NOTE: This will delete all of configured vlans attributes)"
-
-# Before state:
-# -------------
-#
-# Leaf-01#show run nve | sec ^vlan configuration
-# vlan configuration 101
-#  member evpn-instance 101 vni 10101
-# vlan configuration 102
-#  member evpn-instance 102 vni 10102
-# vlan configuration 201
-#  member evpn-instance 201 vni 10201
-# vlan configuration 202
-#  member evpn-instance 202 vni 10202
-# vlan configuration 901
-#  member vni 50901
-
-- name: Delete attributes of ALL VLANs
-  alcatel.aos8.aos8_vlans:
-    configuration: true
-    state: deleted
-
-# After state:
-# -------------
-#
-# Leaf-01#show run nve | sec ^vlan configuration
-# no vlan configuration 101
-# no vlan configuration 102
-# no vlan configuration 201
-# no vlan configuration 202
-# no vlan configuration 901
-# no vlan configuration 902
 
 # Using Gathered (configuration: True)
 
