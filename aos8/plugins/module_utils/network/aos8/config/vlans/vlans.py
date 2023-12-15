@@ -297,14 +297,15 @@ class Vlans(ConfigBase):
     def _clear_config(self, want, have):
         # Delete the vlan config based on the want and have config
         commands = []
-        vlan = self.vlan_parent.format(have.get("vlan_id"))
+        vlan = dict(have).get("vlan_id")
 
         if (
             have.get("vlan_id")
             and "default" not in have.get("name", "")
             and (have.get("vlan_id") != want.get("vlan_id") or self.state == "deleted")
         ):
-            self.remove_command_from_config_list(vlan, "vlan", commands)
+            # self.remove_command_from_config_list(vlan, "vlan", commands)
+            commands.append("no vlan " + str(vlan))
             if self.state == "overridden":
                 self.have_now.remove(have)
         elif "default" not in have.get("name", ""):
