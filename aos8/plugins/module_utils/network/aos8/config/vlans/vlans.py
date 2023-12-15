@@ -78,6 +78,9 @@ class Vlans(ConfigBase):
             commands.extend(self.set_config(existing_vlans_facts))
         if commands and self.state in self.ACTION_STATES:
             if not self._module.check_mode:
+                file1 = open('/home/sadmin/myfile.txt','a')
+                file1.write('\nCommand:' + str(commands))
+                file1.close()                
                 self._connection.edit_config(commands)
             result["changed"] = True
         if self.state in self.ACTION_STATES:
@@ -276,8 +279,6 @@ class Vlans(ConfigBase):
         # Set the interface config based on the want and have config
         commands = []
 
-        vlan = self.vlan_parent.format(want.get("vlan_id"))
-
         def negate_have_config(want_diff, have_diff, vlan, commands):
             name = dict(have_diff).get("name")
             if name and not dict(want_diff).get("name"):
@@ -335,56 +336,19 @@ class Vlans(ConfigBase):
                 negate_have_config(diff, have_diff, vlan, commands)
 
             if not self.configuration:
+                vlan = dict(diff).get("vlan_id")
                 name = dict(diff).get("name")
-                state = dict(diff).get("state")
-                shutdown = dict(diff).get("shutdown")
+                state = dict(diff).get("admin")
                 mtu = dict(diff).get("mtu")
-                remote_span = dict(diff).get("remote_span")
-                private_vlan = dict(diff).get("private_vlan")
 
                 if name:
-                    self.add_command_to_config_list(
-                        vlan,
-                        "name {0}".format(name),
-                        commands,
-                    )
+                    commands.append("vlan " + str(vlan) + " name " + name)
                 if state:
-                    self.add_command_to_config_list(
-                        vlan,
-                        "state {0}".format(state),
-                        commands,
-                    )
+                    commands.append("vlan " + str(vlan) + " admin-state " + state)
                 if mtu:
-                    self.add_command_to_config_list(
-                        vlan,
-                        "mtu {0}".format(mtu),
-                        commands,
-                    )
-                if remote_span:
-                    self.add_command_to_config_list(vlan, "remote-span", commands)
+                    commands.append("vlan " + str(vlan) + " mtu-ip " + str(mtu))
 
-                if private_vlan:
-                    private_vlan_type = dict(private_vlan).get("type")
-                    private_vlan_associated = dict(private_vlan).get("associated")
-                    if private_vlan_type:
-                        self.add_command_to_config_list(
-                            vlan,
-                            "private-vlan {0}".format(private_vlan_type),
-                            commands,
-                        )
-                    if private_vlan_associated:
-                        associated_list = ",".join(
-                            str(e) for e in private_vlan_associated
-                        )  # Convert python list to string with elements separated by a comma
-                        self.add_command_to_config_list(
-                            vlan,
-                            "private-vlan association {0}".format(associated_list),
-                            commands,
-                        )
-                if shutdown == "enabled":
-                    self.add_command_to_config_list(vlan, "shutdown", commands)
-                elif shutdown == "disabled":
-                    self.add_command_to_config_list(vlan, "no shutdown", commands)
+
             else:
                 member_dict = dict(diff).get("member")
                 if member_dict:

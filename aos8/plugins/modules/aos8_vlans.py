@@ -972,12 +972,8 @@ def main():
         supports_check_mode=True,
     )
 
-    if module.params.get("state") in ["rendered", "parsed"]:
-        result = Vlans(module).execute_module()
-        module.exit_json(**result)
-    else:
-        module.fail_json("""Resource VLAN is not valid for the target device.""")
-
+    result = Vlans(module).execute_module()
+    module.exit_json(**result)
 
 if __name__ == "__main__":
     main()
