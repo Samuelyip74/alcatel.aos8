@@ -269,6 +269,7 @@ class Vlans(ConfigBase):
     def _set_config(self, want, have):
         # Set the vlan config based on the want and have config
         commands = []
+        vlan = dict(want).get("vlan_id")
 
         # Get the diff b/w want n have
         want_dict = dict_to_set(want, sort_dictionary=True)
@@ -276,7 +277,6 @@ class Vlans(ConfigBase):
         diff = want_dict - have_dict
 
         if diff:
-            vlan = dict(want).get("vlan_id")
             name = dict(want).get("name")
             state = dict(want).get("admin")
             mtu = dict(want).get("mtu")
