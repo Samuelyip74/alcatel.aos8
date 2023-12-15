@@ -203,25 +203,6 @@ class Vlans(ConfigBase):
 
         return commands
 
-    def merged_k1_k2(self, want, have):
-        commands = []
-        dict_want = dict(want)
-        dict_have = dict(have)
-
-        file1 = open('/home/sadmin/myfile.txt','a')
-        file1.write('\ndiff:' + str(dict_want))
-        file1.write('\nhave_diff:' + str(dict_have))
-        file1.close()        
-
-        if 'name' in dict_want.keys():
-            commands.append("vlan " + str(vlan) + " name " + name)
-        if 'admin' in dict_want.keys():
-            commands.append("vlan " + str(vlan) + " admin-state " + state)
-        if 'mtu' in dict_want.keys():
-            commands.append("vlan " + str(vlan) + " mtu-ip " + str(mtu))  
-
-        return commands      
-
     def _state_merged(self, want, have):
         """The command generator when state is merged
 
@@ -231,18 +212,7 @@ class Vlans(ConfigBase):
         """
         commands = []
 
-        check = False
-        # for k1 in want:
-        #     for k2 in have:
-        #         if k1.get('vlan_id') == k2.get('vlan_id'):
-        #             check = True
-        #             break
-        #             commands.extend(self.merged_k1_k2(k1, k2))
-        #         continue
-        #     if check:
-        #         commands.extend(self.merged_k1_k2(k1, k2))
-        #     else:
-        #         commands.extend(self.merged_k1_k2(k1, k2))                
+        check = False             
         for each in want:
             for every in have:
                 if each.get("vlan_id") == every.get("vlan_id"):
@@ -298,99 +268,32 @@ class Vlans(ConfigBase):
             commands.append(cmd)
 
     def _set_config(self, want, have):
-        # Set the interface config based on the want and have config
+        # Set the vlan config based on the want and have config
         commands = []
 
-        def negate_have_config(want_diff, have_diff, vlan, commands):
-            name = dict(have_diff).get("name")
-            if name and not dict(want_diff).get("name"):
-                self.remove_command_from_config_list(
-                    vlan,
-                    "name {0}".format(name),
-                    commands,
-                )
-            state = dict(have_diff).get("state")
-            if state and not dict(want_diff).get("state"):
-                self.remove_command_from_config_list(
-                    vlan,
-                    "state {0}".format(state),
-                    commands,
-                )
-            shutdown = dict(have_diff).get("shutdown")
-            if shutdown and not dict(want_diff).get("shutdown"):
-                self.remove_command_from_config_list(vlan, "shutdown", commands)
-            mtu = dict(have_diff).get("mtu")
-            if mtu and not dict(want_diff).get("mtu"):
-                self.remove_command_from_config_list(
-                    vlan,
-                    "mtu {0}".format(mtu),
-                    commands,
-                )
-            remote_span = dict(have_diff).get("remote_span")
-            if remote_span and not dict(want_diff).get("remote_span"):
-                self.remove_command_from_config_list(vlan, "remote-span", commands)
-            private_vlan = dict(have_diff).get("private_vlan")
-            if private_vlan and not dict(want_diff).get("private_vlan"):
-                private_vlan_type = dict(private_vlan).get("type")
-                self.remove_command_from_config_list(
-                    vlan,
-                    "private-vlan {0}".format(private_vlan_type),
-                    commands,
-                )
-                if private_vlan_type == "primary" and dict(private_vlan).get(
-                    "associated",
-                ):
-                    self.remove_command_from_config_list(
-                        vlan,
-                        "private-vlan association",
-                        commands,
-                    )
-
         # Get the diff b/w want n have
-
         want_dict = dict_to_set(want, sort_dictionary=True)
         have_dict = dict_to_set(have, sort_dictionary=True)
         diff = want_dict - have_dict
-        have_diff = have_dict - want_dict
 
         if diff:
-            if have_diff and (self.state == "replaced" or self.state == "overridden"):
-                negate_have_config(diff, have_diff, vlan, commands)
-
             if not self.configuration:
                 vlan = dict(want).get("vlan_id")
                 name = dict(want).get("name")
                 state = dict(want).get("admin")
                 mtu = dict(want).get("mtu")
 
+                if 'vlan_id' in have.keys():
+                    pass
+                else:
+                    commands.append("vlan " + str(vlan)) 
                 if name:
-                    commands.append("vlan " + str(vlan) + " name " + name)
+                    commands.append("vlan " + str(vlan) + " name " + '"' + name + '"')
                 if state:
                     commands.append("vlan " + str(vlan) + " admin-state " + state)
                 if mtu:
                     commands.append("vlan " + str(vlan) + " mtu-ip " + str(mtu))
 
-
-            else:
-                member_dict = dict(diff).get("member")
-                if member_dict:
-                    member_dict = dict(member_dict)
-                    member_vni = member_dict.get("vni")
-                    member_evi = member_dict.get("evi")
-                    commands.extend(
-                        self._remove_vlan_vni_evi_mapping(
-                            want,
-                        ),
-                    )
-                    commands.extend(
-                        [
-                            vlan,
-                            self._get_member_cmds(member_dict),
-                        ],
-                    )
-
-        elif have_diff and (self.state == "replaced" or self.state == "overridden"):
-            negate_have_config(diff, have_diff, vlan, commands)
         return commands
 
     def _clear_config(self, want, have):

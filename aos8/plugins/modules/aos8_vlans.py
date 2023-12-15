@@ -158,210 +158,136 @@ EXAMPLES = """
 # Before state:
 # -------------
 #
-# vaos8_l2#show vlan
-# VLAN Name                             Status    Ports
-# ---- -------------------------------- --------- -------------------------------
-# 1    default                          active    Gi0/1, Gi0/2
-# 1002 fddi-default                     act/unsup
-# 1003 token-ring-default               act/unsup
-# 1004 fddinet-default                  act/unsup
-# 1005 trnet-default                    act/unsup
-#
-# VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
-# ---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
-# 1    enet  100001     1500  -      -      -        -    -        0      0
-# 1002 fddi  101002     1500  -      -      -        -    -        0      0
-# 1003 tr    101003     1500  -      -      -        -    -        0      0
-# 1004 fdnet 101004     1500  -      -      -        ieee -        0      0
-# 1005 trnet 101005     1500  -      -      -        ibm  -        0      0
+# ACSW01-> show vlan
+#  vlan    type   admin   oper    ip    mtu          name
+# ------+-------+-------+------+------+------+------------------
+# 1      std       Ena     Ena   Ena    1500    MGNT
 
-- name: Merge provided configuration with device configuration
-  alcatel.aos8.aos8_vlans:
-    config:
-      - name: Vlan_10
-        vlan_id: 10
-        state: active
-        shutdown: disabled
-        remote_span: true
-      - name: Vlan_20
-        vlan_id: 20
-        mtu: 610
-        state: active
-        shutdown: enabled
-      - name: Vlan_30
-        vlan_id: 30
-        state: suspend
-        shutdown: enabled
-    state: merged
+---
+- hosts: all
+  gather_facts: true
+  ignore_errors: true
+  tasks:
+    - name: Run merged VLAN with existing VLANs
+      alcatel.aos8.aos8_vlans:
+        config:
+          - vlan_id: 33
+            name: "Vlan 33"
+            admin: enable
+            mtu: 1280
+          - vlan_id: 99
+            name: "Vlan 99"
+            admin: enable
+      configuration: false
+      state: merged
+
 
 # After state:
 # ------------
 #
-# vaos8_l2#show vlan
-# VLAN Name                             Status    Ports
-# ---- -------------------------------- --------- -------------------------------
-# 1    default                          active    Gi0/1, Gi0/2
-# 10   vlan_10                          active
-# 20   vlan_20                          act/lshut
-# 30   vlan_30                          sus/lshut
-# 1002 fddi-default                     act/unsup
-# 1003 token-ring-default               act/unsup
-# 1004 fddinet-default                  act/unsup
-# 1005 trnet-default                    act/unsup
-#
-# VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
-# ---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
-# 1    enet  100001     1500  -      -      -        -    -        0      0
-# 10   enet  100010     1500  -      -      -        -    -        0      0
-# 20   enet  100020     610   -      -      -        -    -        0      0
-# 30   enet  100030     1500  -      -      -        -    -        0      0
-# 1002 fddi  101002     1500  -      -      -        -    -        0      0
-# 1003 tr    101003     1500  -      -      -        -    -        0      0
-# 1004 fdnet 101004     1500  -      -      -        ieee -        0      0
-# 1005 trnet 101005     1500  -      -      -        ibm  -        0      0
-#
-# Remote SPAN VLANs
-# ------------------------------------------------------------------------------
-# 10
+# ACSW01-> show vlan
+#  vlan    type   admin   oper    ip    mtu          name
+# ------+-------+-------+------+------+------+------------------
+# 1      std       Ena     Ena   Ena    1500    MGNT
+# 33     std       Ena     Dis   Ena    1280    Vlan_33
+# 99     std       Ena     Dis   Dis    1500    Vlan_99
 
-# Using merged (configuration: True)
-
-# Before state:
-# -------------
-#
-# Leaf-01#show run nve | sec ^vlan configuration
-# vlan configuration 101
-#  member evpn-instance 101 vni 10101
-# vlan configuration 201
-#  member evpn-instance 201 vni 10201
-
-
-- name: Merge provided configuration with device configuration
-  alcatel.aos8.aos8_vlans:
-    config:
-      - vlan_id: 102
-        member:
-          vni: 10102
-          evi: 102
-      - vlan_id: 901
-        member:
-          vni: 50901
-    configuration: true
-    state: merged
-
-# After state:
-# ------------
-#
-# Leaf-01#show run nve | sec ^vlan configuration
-# vlan configuration 101
-#  member evpn-instance 101 vni 10101
-# vlan configuration 102
-#  member evpn-instance 102 vni 10102
-# vlan configuration 201
-#  member evpn-instance 201 vni 10201
-# vlan configuration 901
-#  member vni 50901
+# results
+# changed: [192.168.70.1] => {
+#     "after": [
+#         {
+#             "admin": "enable",
+#             "mtu": 1500,
+#             "name": "MGNT",
+#             "operational_state": "enable",
+#             "vlan_id": 1
+#         },
+#         {
+#             "admin": "enable",
+#             "mtu": 1280,
+#             "name": "Vlan_33",
+#             "operational_state": "disable",
+#             "vlan_id": 33
+#         },
+#         {
+#             "admin": "enable",
+#             "mtu": 1500,
+#             "name": "Vlan_99",
+#             "operational_state": "disable",
+#             "vlan_id": 99
+#         },
+#     ],
+#     "before": [
+#         {
+#             "admin": "enable",
+#             "mtu": 1500,
+#             "name": "MGNT",
+#             "operational_state": "enable",
+#             "vlan_id": 1
+#         },
+#     ],
+#     "changed": true,
+#     "commands": [
+#         "vlan 33 name Vlan_33",
+#         "vlan 33 admin-state enable",
+#         "vlan 33 mtu-ip 1280",
+#         "vlan 99 name Vlan_99",
+#         "vlan 99 admin-state enable",
+#         "vlan 99 mtu-ip 1500"
+#     ],
+#     "invocation": {
+#         "module_args": {
+#             "config": [
+#                 {
+#                     "admin": "enable",
+#                     "mtu": 1280,
+#                     "name": "Vlan_33",
+#                     "operational_state": null,
+#                     "vlan_id": 33
+#                 },
+#                 {
+#                     "admin": "enable",
+#                     "mtu": 1500,
+#                     "name": "Vlan_99",
+#                     "operational_state": null,
+#                     "vlan_id": 99
+#                 }
+#             ],
+#             "configuration": false,
+#             "running_config": null,
+#             "state": "merged"
+#         }
+#     }
+# }
 
 # Using overridden
 
 # Before state:
 # -------------
 #
-# vaos8_l2#show vlan
-# VLAN Name                             Status    Ports
-# ---- -------------------------------- --------- -------------------------------
-# 1    default                          active    Gi0/1, Gi0/2
-# 10   vlan_10                          active
-# 20   vlan_20                          act/lshut
-# 30   vlan_30                          sus/lshut
-# 1002 fddi-default                     act/unsup
-# 1003 token-ring-default               act/unsup
-# 1004 fddinet-default                  act/unsup
-# 1005 trnet-default                    act/unsup
-#
-# VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
-# ---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
-# 1    enet  100001     1500  -      -      -        -    -        0      0
-# 10   enet  100010     1500  -      -      -        -    -        0      0
-# 20   enet  100020     610   -      -      -        -    -        0      0
-# 30   enet  100030     1500  -      -      -        -    -        0      0
-# 1002 fddi  101002     1500  -      -      -        -    -        0      0
-# 1003 tr    101003     1500  -      -      -        -    -        0      0
-# 1004 fdnet 101004     1500  -      -      -        ieee -        0      0
-# 1005 trnet 101005     1500  -      -      -        ibm  -        0      0
-#
-# Remote SPAN VLANs
-# ------------------------------------------------------------------------------
-# 10
+# ACSW01-> show vlan
+#  vlan    type   admin   oper    ip    mtu          name
+# ------+-------+-------+------+------+------+------------------
+# 1      std       Ena     Ena   Ena    1500    MGNT
+# 33     std       Ena     Dis   Ena    1280    Vlan_33
+# 99     std       Ena     Dis   Dis    1500    Vlan_99
 
 - name: Override device configuration of all VLANs with provided configuration
   alcatel.aos8.aos8_vlans:
     config:
-      - name: Vlan_10
-        vlan_id: 10
+      - vlan_id: 33
+        name: Vlan_33
         mtu: 1000
     state: overridden
 
 # After state:
 # ------------
 #
-# vaos8_l2#show vlan
-# VLAN Name                             Status    Ports
-# ---- -------------------------------- --------- -------------------------------
-# 1    default                          active    Gi0/1, Gi0/2
-# 10   Vlan_10                          active
-# 1002 fddi-default                     act/unsup
-# 1003 token-ring-default               act/unsup
-# 1004 fddinet-default                  act/unsup
-# 1005 trnet-default                    act/unsup
-#
-# VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
-# ---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
-# 1    enet  100001     1500  -      -      -        -    -        0      0
-# 10   enet  100010     1000  -      -      -        -    -        0      0
-# 1002 fddi  101002     1500  -      -      -        -    -        0      0
-# 1003 tr    101003     1500  -      -      -        -    -        0      0
-# 1004 fdnet 101004     1500  -      -      -        ieee -        0      0
-# 1005 trnet 101005     1500  -      -      -        ibm  -        0      0
-
-
-# Using overridden (configuration: True)
-
-# Before state:
-# -------------
-#
-# Leaf-01#show run nve | sec ^vlan configuration
-# vlan configuration 101
-#  member evpn-instance 101 vni 10101
-# vlan configuration 102
-#  member evpn-instance 102 vni 10102
-# vlan configuration 201
-#  member evpn-instance 201 vni 10201
-# vlan configuration 901
-#  member vni 50901
-
-- name: Override device configuration of all VLANs with provided configuration
-  alcatel.aos8.aos8_vlans:
-    config:
-      - vlan_id: 101
-        member:
-          vni: 10102
-          evi: 102
-      - vlan_id: 102
-        member:
-          vni: 10101
-          evi: 101
-    configuration: true
-    state: overridden
-
-# After state:
-# ------------
-#
-# Leaf-01#show run nve | sec ^vlan configuration
-# vlan configuration 101
-#  member evpn-instance 102 vni 10102
-# vlan configuration 102
-#  member evpn-instance 101 vni 10101
+# ACSW01-> show vlan
+#  vlan    type   admin   oper    ip    mtu          name
+# ------+-------+-------+------+------+------+------------------
+# 1      std       Ena     Ena   Ena    1500    MGNT
+# 33     std       Ena     Dis   Ena    1000    Vlan_33
 
 # Using replaced
 

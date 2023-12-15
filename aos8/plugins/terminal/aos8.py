@@ -38,11 +38,12 @@ class TerminalModule(TerminalBase):
         List down all the known error messages from the device.
     """
     terminal_stderr_re = [
+        re.compile(rb"ERROR: Invalid entry:", re.I),                                    # AOS8
+        re.compile(rb"ERROR: Allowed range of values for mtu is 1280 - 9198", re.I),    # AOS8
         re.compile(rb"% ?Error"),
         # re.compile(rb"^% \w+", re.M),
         re.compile(rb"% ?Bad secret"),
         re.compile(rb"[\r\n%] Bad passwords"),
-        re.compile(rb"ERROR: Invalid entry:", re.I),                # AOS8
         re.compile(rb"(?:incomplete|ambiguous) command", re.I),
         re.compile(rb"connection timed out", re.I),
         re.compile(rb"[^\r\n]+ not found"),
