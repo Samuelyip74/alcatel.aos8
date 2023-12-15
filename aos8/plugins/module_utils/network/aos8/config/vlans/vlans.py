@@ -33,9 +33,7 @@ class Vlans(ConfigBase):
     """
     The aos8_vlans class
     """
-
     gather_subset = ["!all", "!min"]
-
     gather_network_resources = ["vlans"]
 
     def __init__(self, module):
@@ -43,11 +41,9 @@ class Vlans(ConfigBase):
 
     def get_vlans_facts(self, data=None):
         """Get the 'facts' (the current configuration)
-
         :rtype: A dictionary
         :returns: The current configuration as a dictionary
         """
-
         facts, _warnings = Facts(self._module).get_facts(
             self.gather_subset,
             self.gather_network_resources,
@@ -60,7 +56,6 @@ class Vlans(ConfigBase):
 
     def execute_module(self):
         """Execute the module
-
         :rtype: A dictionary
         :returns: The result from module execution
         """
@@ -77,10 +72,7 @@ class Vlans(ConfigBase):
         if self.state in self.ACTION_STATES or self.state == "rendered":
             commands.extend(self.set_config(existing_vlans_facts))
         if commands and self.state in self.ACTION_STATES:
-            if not self._module.check_mode:
-                file1 = open('/home/sadmin/myfile.txt','a')
-                file1.write('\nCommand:' + str(commands))
-                file1.close()                
+            if not self._module.check_mode:              
                 self._connection.edit_config(commands)
             result["changed"] = True
         if self.state in self.ACTION_STATES:
@@ -211,6 +203,25 @@ class Vlans(ConfigBase):
 
         return commands
 
+    def merged_k1_k2(self, want, have):
+        commands = []
+        dict_want = dict(want)
+        dict_have = dict(have)
+
+        file1 = open('/home/sadmin/myfile.txt','a')
+        file1.write('\ndiff:' + str(dict_want))
+        file1.write('\nhave_diff:' + str(dict_have))
+        file1.close()        
+
+        if 'name' in dict_want.keys():
+            commands.append("vlan " + str(vlan) + " name " + name)
+        if 'admin' in dict_want.keys():
+            commands.append("vlan " + str(vlan) + " admin-state " + state)
+        if 'mtu' in dict_want.keys():
+            commands.append("vlan " + str(vlan) + " mtu-ip " + str(mtu))  
+
+        return commands      
+
     def _state_merged(self, want, have):
         """The command generator when state is merged
 
@@ -221,6 +232,17 @@ class Vlans(ConfigBase):
         commands = []
 
         check = False
+        # for k1 in want:
+        #     for k2 in have:
+        #         if k1.get('vlan_id') == k2.get('vlan_id'):
+        #             check = True
+        #             break
+        #             commands.extend(self.merged_k1_k2(k1, k2))
+        #         continue
+        #     if check:
+        #         commands.extend(self.merged_k1_k2(k1, k2))
+        #     else:
+        #         commands.extend(self.merged_k1_k2(k1, k2))                
         for each in want:
             for every in have:
                 if each.get("vlan_id") == every.get("vlan_id"):
@@ -267,7 +289,7 @@ class Vlans(ConfigBase):
             commands.append("no %s" % vlan_id)
             return commands
         commands.append("no %s" % cmd)
-        return commands
+        return commands  
 
     def add_command_to_config_list(self, vlan_id, cmd, commands):
         if vlan_id not in commands:
@@ -336,10 +358,10 @@ class Vlans(ConfigBase):
                 negate_have_config(diff, have_diff, vlan, commands)
 
             if not self.configuration:
-                vlan = dict(diff).get("vlan_id")
-                name = dict(diff).get("name")
-                state = dict(diff).get("admin")
-                mtu = dict(diff).get("mtu")
+                vlan = dict(want).get("vlan_id")
+                name = dict(want).get("name")
+                state = dict(want).get("admin")
+                mtu = dict(want).get("mtu")
 
                 if name:
                     commands.append("vlan " + str(vlan) + " name " + name)
