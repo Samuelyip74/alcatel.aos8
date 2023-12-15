@@ -63,7 +63,6 @@ class Vlans(ConfigBase):
         commands = list()
         warnings = list()
         self.have_now = list()
-        self.configuration = self._module.params["configuration"]
         if self.state in self.ACTION_STATES:
             existing_vlans_facts = self.get_vlans_facts()
         else:
@@ -277,22 +276,21 @@ class Vlans(ConfigBase):
         diff = want_dict - have_dict
 
         if diff:
-            if not self.configuration:
-                vlan = dict(want).get("vlan_id")
-                name = dict(want).get("name")
-                state = dict(want).get("admin")
-                mtu = dict(want).get("mtu")
+            vlan = dict(want).get("vlan_id")
+            name = dict(want).get("name")
+            state = dict(want).get("admin")
+            mtu = dict(want).get("mtu")
 
-                if 'vlan_id' in have.keys():
-                    pass
-                else:
-                    commands.append("vlan " + str(vlan)) 
-                if name:
-                    commands.append("vlan " + str(vlan) + " name " + '"' + name + '"')
-                if state:
-                    commands.append("vlan " + str(vlan) + " admin-state " + state)
-                if mtu:
-                    commands.append("vlan " + str(vlan) + " mtu-ip " + str(mtu))
+            if 'vlan_id' in have.keys():
+                pass
+            else:
+                commands.append("vlan " + str(vlan)) 
+            if name:
+                commands.append("vlan " + str(vlan) + " name " + '"' + name + '"')
+            if state:
+                commands.append("vlan " + str(vlan) + " admin-state " + state)
+            if mtu:
+                commands.append("vlan " + str(vlan) + " mtu-ip " + str(mtu))
 
         return commands
 
@@ -307,22 +305,21 @@ class Vlans(ConfigBase):
             and (have.get("vlan_id") != want.get("vlan_id") or self.state == "deleted")
         ):
             self.remove_command_from_config_list(vlan, "vlan", commands)
-            if self.configuration and self.state == "overridden":
+            if self.state == "overridden":
                 self.have_now.remove(have)
         elif "default" not in have.get("name", ""):
-            if not self.configuration:
-                if have.get("mtu") != want.get("mtu"):
-                    self.remove_command_from_config_list(vlan, "mtu", commands)
-                if have.get("remote_span") != want.get("remote_span") and want.get(
-                    "remote_span",
-                ):
-                    self.remove_command_from_config_list(vlan, "remote-span", commands)
-                if have.get("shutdown") != want.get("shutdown") and want.get(
-                    "shutdown",
-                ):
-                    self.remove_command_from_config_list(vlan, "shutdown", commands)
-                if have.get("state") != want.get("state") and want.get("state"):
-                    self.remove_command_from_config_list(vlan, "state", commands)
+            if have.get("mtu") != want.get("mtu"):
+                self.remove_command_from_config_list(vlan, "mtu", commands)
+            if have.get("remote_span") != want.get("remote_span") and want.get(
+                "remote_span",
+            ):
+                self.remove_command_from_config_list(vlan, "remote-span", commands)
+            if have.get("shutdown") != want.get("shutdown") and want.get(
+                "shutdown",
+            ):
+                self.remove_command_from_config_list(vlan, "shutdown", commands)
+            if have.get("state") != want.get("state") and want.get("state"):
+                self.remove_command_from_config_list(vlan, "state", commands)
         return commands
 
     def _remove_vlan_vni_evi_mapping(self, want_dict):

@@ -50,7 +50,6 @@ class VlansArgs(object):
                 "operational_state": {"type": "str", "choices": ["enable", "disable"]},
             },
         },
-        "configuration": {"type": "bool"},
         "running_config": {"type": "str"},
         "state": {
             "choices": [
