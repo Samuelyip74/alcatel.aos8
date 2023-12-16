@@ -23,52 +23,24 @@ __metaclass__ = type
 
 DOCUMENTATION = """
 author:
-- Ansible Networking Team (@ansible-network)
-name: ios
-short_description: Use ios cliconf to run command on Cisco IOS platform
+- Samuel Yip (@samuelyip74)
+name: AOS8
+short_description: Use AOS8 cliconf to run command on Alcatel-Lucent Enterprise AOS8 platform
 description:
 - This ios plugin provides low level abstraction apis for sending and receiving CLI
-  commands from Cisco IOS network devices.
+  commands from Alcatel-Lucent Enterprise AOS8 network devices.
 version_added: 1.0.0
 options:
-  commit_confirm_immediate:
+  flash_synchro_flag:
     type: boolean
     default: false
     description:
-    - Enable or disable commit confirm mode.
-    - Confirms the configuration pushed after a custom/ default timeout.(default 1 minute).
-    - For custom timeout configuration set commit_confirm_timeout value.
-    - On commit_confirm_immediate default value for commit_confirm_timeout is considered 1 minute
-      when variable in not explicitly declared.
+    - True or false to copy sync working and certified directories.
     env:
-    - name: ANSIBLE_IOS_COMMIT_CONFIRM_IMMEDIATE
+    - name: ANSIBLE_AOS_FLASH_SYNCHRO_FLAG
     vars:
-    - name: ansible_ios_commit_confirm_immediate
-  commit_confirm_timeout:
-    type: int
-    description:
-    - Commits the configuration on a trial basis for the time
-      specified in minutes.
-    - Using commit_confirm_timeout without specifying commit_confirm_immediate would
-      need an explicit C(configure confirm) using the ios_command module
-      to confirm/commit the changes made.
-    - Refer to example for a use case demonstration.
-    env:
-    - name: ANSIBLE_IOS_COMMIT_CONFIRM_TIMEOUT
-    vars:
-    - name: ansible_ios_commit_confirm_timeout
-  config_commands:
-    description:
-    - Specifies a list of commands that can make configuration changes
-      to the target device.
-    - When `ansible_network_single_user_mode` is enabled, if a command sent
-      to the device is present in this list, the existing cache is invalidated.
-    version_added: 2.0.0
-    type: list
-    elements: str
-    default: []
-    vars:
-    - name: ansible_ios_config_commands
+    - name: ansible_aos_flash_synchro_flag
+
 """
 
 EXAMPLES = """
@@ -285,12 +257,17 @@ class Cliconf(CliconfBase):
                 cmd = line["command"]
                 if cmd != "exit" and cmd[0] != "!":
                     results.append(self.send_command(**line))
-                    requests.append(cmd)            
-            # write memory and sych working and certified directory
+                    requests.append(cmd) 
+
+            # save configuration into flash (working directory) 
             if commit:        
                 self.write_memory()
-            else:
-                raise ValueError("check mode is not supported")
+
+
+            if self.get_option("flash_synchro_flag"):
+                self.flash_sychro()
+             
+  
         else:
             raise ValueError("Device in CERTIFIED mode")
 
@@ -373,7 +350,7 @@ class Cliconf(CliconfBase):
 
     # Save configuration and raise error if configuration not synchronize.
     def write_memory(self):
-        reply = self.get(command="write memory flash-synchro")
+        reply = self.get(command="write memory")
         reply = self.get(command="show running-directory")
         data = to_text(reply, errors="surrogate_or_strict").strip()
         match = re.search(r"NOT SYNCHRONIZED", data)
@@ -381,6 +358,16 @@ class Cliconf(CliconfBase):
             raise ValueError("Configuration not synchronized.")
         else:
             return True
+
+    def flash_sychro(self):
+        reply = self.get(command="copy flash-synchro")
+        reply = self.get(command="show running-directory")
+        data = to_text(reply, errors="surrogate_or_strict").strip()
+        match = re.search(r"CERTIFY NEEDED", data)
+        if match:
+            raise ValueError("Certified directory not synchronized.")
+        else:
+            return True            
 
     # Return the basic information about the device.  Model / Version and Up time
     def get_device_info(self):
