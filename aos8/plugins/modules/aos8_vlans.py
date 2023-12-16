@@ -96,7 +96,7 @@ options:
       - replaced
       - overridden
       - deleted
-      - rendered
+      - rendered  
       - gathered
       - parsed
     default: merged
@@ -210,34 +210,88 @@ EXAMPLES = """
 #     }
 # }
 
-# # Using overridden
+# Using overridden
 
-# # Before state:
-# # -------------
-# #
-# # ACSW01-> show vlan
-# #  vlan    type   admin   oper    ip    mtu          name
-# # ------+-------+-------+------+------+------+------------------
-# # 1      std       Ena     Ena   Ena    1500    MGNT
-# # 33     std       Ena     Dis   Ena    1280    Vlan_33
-# # 99     std       Ena     Dis   Dis    1500    Vlan_99
+# Before state:
+# -------------
+#
+# ACSW01-> show vlan
+#  vlan    type   admin   oper    ip    mtu          name
+# ------+-------+-------+------+------+------+------------------
+# 1      std       Ena     Ena   Ena    1500    MGNT
+# 33     std       Ena     Dis   Ena    1280    Vlan_33
+# 99     std       Ena     Dis   Dis    1500    Vlan_99
 
 # - name: Override device configuration of all VLANs with provided configuration
 #   alcatel.aos8.aos8_vlans:
 #     config:
+#       - vlan_id: 1
+#         name: MGNT
+#         mtu: 1500
 #       - vlan_id: 33
 #         name: Vlan_33
 #         mtu: 1280
 #     state: overridden
 
-# # After state:
-# # ------------
-# #
-# # ACSW01-> show vlan
-# #  vlan    type   admin   oper    ip    mtu          name
-# # ------+-------+-------+------+------+------+------------------
-# # 1      std       Ena     Ena   Ena    1500    MGNT
-# # 33     std       Ena     Dis   Ena    1280    Vlan_33
+# After state:
+# ------------
+#
+# ACSW01-> show vlan
+#  vlan    type   admin   oper    ip    mtu          name
+# ------+-------+-------+------+------+------+------------------
+# 1      std       Ena     Ena   Ena    1500    MGNT
+# 33     std       Ena     Dis   Ena    1280    Vlan_33
+
+#     "after": [
+#         {
+#             "admin": "enable",
+#             "mtu": 1500,
+#             "name": "MGNT",
+#             "operational_state": "enable",
+#             "vlan_id": 1
+#         },
+#         {
+#             "admin": "enable",
+#             "mtu": 1500,
+#             "name": "Vlan_33",
+#             "operational_state": "enable",
+#             "vlan_id": 33
+#         },
+#         {
+#             "admin": "enable",
+#             "mtu": 1500,
+#             "name": "Vlan 99",
+#             "operational_state": "disable",
+#             "vlan_id": 99
+#         }
+#     ],
+#     "changed": true,
+#     "commands": [
+#         "no vlan 99"
+#     ],
+#     "invocation": {
+#         "module_args": {
+#             "config": [
+#         {
+#             "admin": "enable",
+#             "mtu": 1500,
+#             "name": "MGNT",
+#             "operational_state": "enable",
+#             "vlan_id": 1
+#         },
+#         {
+#             "admin": "enable",
+#             "mtu": 1500,
+#             "name": "Vlan_33",
+#             "operational_state": "enable",
+#             "vlan_id": 33
+#         },
+#             ],
+#             "running_config": null,
+#             "state": "overridden"
+#         }
+#     }
+# }
 
 # Using replaced
 
