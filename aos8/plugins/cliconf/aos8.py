@@ -31,6 +31,15 @@ description:
   commands from Alcatel-Lucent Enterprise AOS8 network devices.
 version_added: 1.0.0
 options:
+  write_memory_flag:
+    type: boolean
+    default: true
+    description:
+    - True or false to save configuration into flash
+    env:
+    - name: ANSIBLE_AOS_WRITE_MEMORY_FLASH
+    vars:
+    - name: ansible_aos_write_memory_flash
   flash_synchro_flag:
     type: boolean
     default: false
@@ -39,72 +48,22 @@ options:
     env:
     - name: ANSIBLE_AOS_FLASH_SYNCHRO_FLAG
     vars:
-    - name: ansible_aos_flash_synchro_flag
+    - name: ansible_aos_flash_synchro_flag    
 
 """
 
 EXAMPLES = """
-# NOTE - IOS waits for a `configure confirm` when the configure terminal
-# command executed is `configure terminal revert timer <timeout>` within the timeout
-# period for the configuration to commit successfully, else a rollback
-# happens.
-
-# Use commit confirm with timeout and confirm the commit explicitly
 
 - name: Example commit confirmed
   vars:
-    ansible_ios_commit_confirm_timeout: 1
+    ansible_aos_write_memory_flash: true
+    ansible_aos_flash_synchro_flag: false
   tasks:
     - name: "Commit confirmed with timeout"
-      cisco.ios.ios_hostname:
+      alcatel.aos8.aos8_hostname:
         state: merged
         config:
           hostname: R1
-
-    - name: "Confirm the Commit"
-      cisco.ios.ios_command:
-        commands:
-          - configure confirm
-
-# Commands fired
-# - configure terminal revert timer 1 (cliconf specific)
-# - hostname R1 (from hostname resource module)
-# - configure confirm (from ios_command module)
-
-# Use commit confirm with timeout and confirm the commit via cliconf
-
-- name: Example commit confirmed
-  vars:
-    ansible_ios_commit_confirm_immediate: True
-    ansible_ios_commit_confirm_timeout: 3
-  tasks:
-    - name: "Commit confirmed with timeout"
-      cisco.ios.ios_hostname:
-        state: merged
-        config:
-          hostname: R1
-
-# Commands fired
-# - configure terminal revert timer 3 (cliconf specific)
-# - hostname R1 (from hostname resource module)
-# - configure confirm (cliconf specific)
-
-# Use commit confirm via cliconf using default timeout
-
-- name: Example commit confirmed
-  vars:
-    ansible_ios_commit_confirm_immediate: True
-  tasks:
-    - name: "Commit confirmed with timeout"
-      cisco.ios.ios_hostname:
-        state: merged
-        config:
-          hostname: R1
-
-# Commands fired
-# - configure terminal revert timer 1 (cliconf specific with default timeout)
-# - hostname R1 (from hostname resource module)
-# - configure confirm (cliconf specific)
 
 """
 
@@ -259,13 +218,14 @@ class Cliconf(CliconfBase):
                     results.append(self.send_command(**line))
                     requests.append(cmd) 
 
-            # save configuration into flash (working directory) 
-            if commit:        
-                self.write_memory()
+            if commit:      
+                # save configuration into flash (working directory) if write_memory_flag: true
+                if self.get_option("write_memory_flag"):
+                    self.write_memory()
 
-
-            if self.get_option("flash_synchro_flag"):
-                self.flash_sychro()
+                # copy working directory to certify directory if  flash_synchro_flag: true
+                if self.get_option("flash_synchro_flag"):
+                    self.flash_sychro()
              
   
         else:
