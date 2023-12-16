@@ -27,7 +27,7 @@ author:
 name: AOS8
 short_description: Use AOS8 cliconf to run command on Alcatel-Lucent Enterprise AOS8 platform
 description:
-- This ios plugin provides low level abstraction apis for sending and receiving CLI
+- This AOS8 plugin provides low level abstraction apis for sending and receiving CLI
   commands from Alcatel-Lucent Enterprise AOS8 network devices.
 version_added: 1.0.0
 options:
@@ -82,7 +82,6 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.c
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.utils import to_list
 from ansible_collections.ansible.netcommon.plugins.plugin_utils.cliconf_base import (
     CliconfBase,
-    enable_mode,
 )
 
 
@@ -377,45 +376,10 @@ class Cliconf(CliconfBase):
 
     def get_capabilities(self):
         result = super(Cliconf, self).get_capabilities()
-        result["rpc"] += ["edit_banner", "get_diff", "run_commands", "get_defaults_flag"]
+        # result["rpc"] += ["edit_banner", "get_diff", "run_commands", "get_defaults_flag"]
         result["device_operations"] = self.get_device_operations()
         result.update(self.get_option_values())
         return json.dumps(result)
-
-    def edit_banner(self, candidate=None, multiline_delimiter="@", commit=True):
-        """
-        Edit banner on remote device
-        :param banners: Banners to be loaded in json format
-        :param multiline_delimiter: Line delimiter for banner
-        :param commit: Boolean value that indicates if the device candidate
-               configuration should be  pushed in the running configuration or discarded.
-        :param diff: Boolean flag to indicate if configuration that is applied on remote host should
-                     generated and returned in response or not
-        :return: Returns response of executing the configuration command received
-             from remote host
-        """
-        resp = {}
-        banners_obj = json.loads(candidate)
-        results = []
-        requests = []
-        if commit:
-            for key, value in iteritems(banners_obj):
-                key += " %s" % multiline_delimiter
-                self.send_command("config terminal", sendonly=True)
-                for cmd in [key, value, multiline_delimiter]:
-                    obj = {"command": cmd, "sendonly": True}
-                    results.append(self.send_command(**obj))
-                    requests.append(cmd)
-
-                self.send_command("end", sendonly=True)
-                time.sleep(0.1)
-                results.append(self.send_command("\n"))
-                requests.append("\n")
-
-        resp["request"] = requests
-        resp["response"] = results
-
-        return resp
 
     def run_commands(self, commands=None, check_rc=True):
         if commands is None:
@@ -459,43 +423,6 @@ class Cliconf(CliconfBase):
             return "all"
         else:
             return "full"
-
-    # def set_cli_prompt_context(self):
-    #     """
-    #     Make sure we are in the operational cli mode
-    #     :return: None
-    #     """
-    #     if self._connection.connected:
-    #         out = self._connection.get_prompt()
-
-    #         if out is None:
-    #             raise AnsibleConnectionFailure(
-    #                 message="cli prompt is not identified from the last received"
-    #                 " response window: %s" % self._connection._last_recv_window,
-    #             )
-
-    #         if re.search(r"config.*\)#", to_text(out, errors="surrogate_then_replace").strip()):
-    #             self._connection.queue_message("vvvv", "wrong context, sending end to device")
-    #             self._connection.send_command("end")
-
-    def _extract_banners(self, config):
-        banners = {}
-        banner_cmds = re.findall(r"^banner (\w+)", config, re.M)
-        for cmd in banner_cmds:
-            regex = r"banner %s \^C(.+?)(?=\^C)" % cmd
-            match = re.search(regex, config, re.S)
-            if match:
-                key = "banner %s" % cmd
-                banners[key] = match.group(1).strip()
-
-        for cmd in banner_cmds:
-            regex = r"banner %s \^C(.+?)(?=\^C)" % cmd
-            match = re.search(regex, config, re.S)
-            if match:
-                config = config.replace(str(match.group(1)), "")
-
-        config = re.sub(r"banner \w+ \^C\^C", "!! banner removed", config)
-        return config, banners
 
     def _diff_banners(self, want, have):
         candidate = {}
