@@ -204,7 +204,6 @@ class Cliconf(CliconfBase):
         results = []
         requests = []
 
-
         device_running_directory_state = self.check_running_directory()
         # check if device is running configuration from working directory.
         if device_running_directory_state is None:
@@ -320,6 +319,13 @@ class Cliconf(CliconfBase):
             return True
 
     def flash_sychro(self):
+        persistent_command_timeout = self._connection.get_option("persistent_command_timeout")        
+        if persistent_command_timeout < 60:
+            raise ValueError(
+                "ansible_command_timeout can't be less than 60 seconds."
+                "Please adjust and try again",
+            )
+
         reply = self.get(command="copy flash-synchro")
         reply = self.get(command="show running-directory")
         data = to_text(reply, errors="surrogate_or_strict").strip()
