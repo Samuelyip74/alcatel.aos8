@@ -495,22 +495,17 @@ EXAMPLES = """
 # }
 
 
-# Using Gathered (configuration: True)
+# Using Gathered
 
 # Before state:
 # -------------
 #
-# Leaf-01#show run nve | sec ^vlan configuration
-# vlan configuration 101
-#  member evpn-instance 101 vni 10101
-# vlan configuration 102
-#  member evpn-instance 102 vni 10102
-# vlan configuration 201
-#  member evpn-instance 201 vni 10201
-# vlan configuration 202
-#  member evpn-instance 202 vni 10202
-# vlan configuration 901
-#  member vni 50901
+# ACSW01-> show vlan
+#  vlan    type   admin   oper    ip    mtu          name
+# ------+-------+-------+------+------+------+------------------
+# 1      std       Ena     Ena   Ena    1500    MGNT
+# 33     std       Ena     Dis   Ena    1280    Vlan_33
+# 99     std       Ena     Dis   Ena    1500    Vlan_99
 
 - name: Gather listed vlans with provided configurations
   alcatel.aos8.aos8_vlans:
@@ -518,51 +513,39 @@ EXAMPLES = """
     configuration: true
     state: gathered
 
-# Module Execution Result:
-# ------------------------
-#
-# gathered = [
-#     {
-#         "member": {
-#             "evi": 101,
-#             "vni": 10101
+#  "changed": false,
+#     "gathered": [
+#         {
+#             "admin": "enable",
+#             "mtu": 1500,
+#             "name": "MGNT",
+#             "operational_state": "enable",
+#             "vlan_id": 1
 #         },
-#         "vlan_id": 101
-#     },
-#     {
-#         "member": {
-#             "evi": 102,
-#             "vni": 10102
+#         {
+#             "admin": "enable",
+#             "mtu": 1500,
+#             "name": "Vlan_33",
+#             "operational_state": "enable",
+#             "vlan_id": 33
 #         },
-#         "vlan_id": 102
-#     },
-#     {
-#         "member": {
-#             "evi": 201,
-#             "vni": 10201
+#         {
+#             "admin": "enable",
+#             "mtu": 1500,
+#             "name": "Vlan_99",
+#             "operational_state": "enable",
+#             "vlan_id": 99
 #         },
-#         "vlan_id": 201
-#     },
-#     {
-#         "member": {
-#             "evi": 202,
-#             "vni": 10202
-#         },
-#         "vlan_id": 202
-#     },
-#     {
-#         "member": {
-#             "vni": 50901
-#         },
-#         "vlan_id": 901
-#     },
-#     {
-#         "member": {
-#             "vni": 50902
-#         },
-#         "vlan_id": 902
+#     ],
+#     "invocation": {
+#         "module_args": {
+#             "config": null,
+#             "running_config": null,
+#             "state": "gathered"
+#         }
 #     }
-# ]
+# }
+
 
 # Using Rendered
 
