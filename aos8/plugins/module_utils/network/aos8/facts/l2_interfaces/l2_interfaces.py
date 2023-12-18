@@ -22,17 +22,17 @@ from copy import deepcopy
 
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common import utils
 
-from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.vlans.vlans import (
-    VlansArgs,
+from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.argspec.l2_interfaces.l2_interfaces import (
+    L2_interfacesArgs,
 )
 
 
-class VlansFacts(object):
-    """The ios vlans fact class"""
+class L2_interfacesFacts(object):
+    """The aos vlans fact class"""
 
     def __init__(self, module, subspec="config", options="options"):
         self._module = module
-        self.argument_spec = VlansArgs.argument_spec
+        self.argument_spec = L2_interfacesArgs.argument_spec
         spec = deepcopy(self.argument_spec)
         if subspec:
             if options:
@@ -44,8 +44,8 @@ class VlansFacts(object):
 
         self.generated_spec = utils.generate_dict(facts_argument_spec)
 
-    def get_vlans_data(self, connection):
-        cmd = "show vlan"
+    def get_vlan_members_data(self, connection):
+        cmd = "show vlan members"
         return connection.get(cmd)
 
     def populate_facts(self, connection, ansible_facts, data=None):
@@ -59,16 +59,16 @@ class VlansFacts(object):
         objs = []
 
         if not data:
-            data = self.get_vlans_data(connection)
-            objs = self.parse_vlan(data)
+            data = self.get_vlan_members_data(connection)
+            objs = self.parse_vlan_members(data)
 
         facts = {}
         if objs:
-            facts["vlans"] = []
+            facts["l2_interfaces"] = []
             params = utils.validate_config(self.argument_spec, {"config": objs})
 
             for cfg in params["config"]:
-                facts["vlans"].append(utils.remove_empties(cfg))
+                facts["l2_interfaces"].append(utils.remove_empties(cfg))
         ansible_facts["ansible_network_resources"].update(facts)
         return ansible_facts
 
@@ -173,31 +173,26 @@ class VlansFacts(object):
 
         return vlan_list
 
-    def parse_vlan(self, data):
+    def parse_vlan_members(self, data):
         objs = []
 
         # operate on a collection of resource x
         config = data.split("\n")
         # Get individual vlan configs separately
         for conf in config:
-            match = re.match("^(?P<vlan_id>[\d]+).*(?P<type>std)\s*(?P<admin>Ena|Dis)\s*(?P<oper>Ena|Dis)\s*(?P<ip>Ena|Dis)\s*(?P<mtu>[\d]+)\s*(?P<name>.*)$", conf)
+            match = re.match("^^\s+(?P<vlan_id>[\d]+)\s+(?P<port_number>(\d+\/\S+))\s+(?P<port_type>untagged|tagged)\s+(?P<status>.*)$", conf)
             if match:
-                if match.group('admin') == 'Ena':
-                    admin_state = "enable"  
+                port_number = match.group('port_number')
+                if re.match('(\d)+\/(\d)+\/(\d)+', port_number):
+                    port_type = 'port'
                 else:
-                    admin_state = "disable"
-
-                if match.group('oper') == 'Ena':
-                    operational_state = "enable"
-                else:
-                    operational_state = "disable"                    
-                vlan_obj = {
-                        'vlan_id' : match.group('vlan_id'),
-                        'name' : match.group('name').strip(), 
-                        'mtu' : match.group('mtu'), 
-                        'admin': admin_state,
-                        'operational_state' : operational_state,
+                    port_type = 'linkagg'
+                members_obj = {
+                    'vlan_id' : match.group('vlan_id'),
+                    'port_number' : match.group('port_number'), 
+                    'mode' : match.group('port_type'),
+                    'port_type' : port_type,
                 }
-                objs.append(vlan_obj)
+                objs.append(members_obj)
 
         return objs

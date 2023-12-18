@@ -21,6 +21,7 @@ class FactsArgs(object):  # pylint: disable=R0903
 
     choices = [
         'all',
+        'l2_interfaces',
         'hostname',
         'vlans',
     ]
