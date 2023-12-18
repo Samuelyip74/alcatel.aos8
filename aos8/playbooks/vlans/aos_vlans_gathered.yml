@@ -9,7 +9,6 @@
     - name: Run VLAN resource module with state gathered
       alcatel.aos8.aos8_vlans:
         config:
-        # configuration: true
         state: gathered
 
 
