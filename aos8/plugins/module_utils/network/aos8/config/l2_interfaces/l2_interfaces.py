@@ -31,7 +31,7 @@ from ansible_collections.alcatel.aos8.plugins.module_utils.network.aos8.utils.ut
 
 class L2_interfaces(ConfigBase):
     """
-    The aos8_vlans class
+    The aos8_l2_interfaces class
     """
     gather_subset = ["!all", "!min"]
     gather_network_resources = ["l2_interfaces"]
@@ -39,7 +39,7 @@ class L2_interfaces(ConfigBase):
     def __init__(self, module):
         super(Vlans, self).__init__(module)
 
-    def get_vlans_facts(self, data=None):
+    def get_l2_interfaces_facts(self, data=None):
         """Get the 'facts' (the current configuration)
         :rtype: A dictionary
         :returns: The current configuration as a dictionary
@@ -49,10 +49,10 @@ class L2_interfaces(ConfigBase):
             self.gather_network_resources,
             data=data,
         )
-        vlans_facts = facts["ansible_network_resources"].get("l2_interfaces")
-        if not vlans_facts:
+        l2_interfaces_facts = facts["ansible_network_resources"].get("l2_interfaces")
+        if not l2_interfaces_facts:
             return []
-        return vlans_facts
+        return l2_interfaces_facts
 
     def execute_module(self):
         """Execute the module
@@ -64,12 +64,12 @@ class L2_interfaces(ConfigBase):
         warnings = list()
         self.have_now = list()
         if self.state in self.ACTION_STATES:
-            existing_vlans_facts = self.get_vlans_facts()
+            existing_l2_interfaces_facts = self.get_l2_interfaces_facts()
         else:
-            existing_vlans_facts = []
+            existing_l2_interfaces_facts = []
 
         if self.state in self.ACTION_STATES or self.state == "rendered":
-            commands.extend(self.set_config(existing_vlans_facts))
+            commands.extend(self.set_config(existing_l2_interfaces_facts))
         if commands and self.state in self.ACTION_STATES:
             if not self._module.check_mode:              
                 self._connection.edit_config(commands)
@@ -78,7 +78,7 @@ class L2_interfaces(ConfigBase):
             result["commands"] = commands
 
         if self.state in self.ACTION_STATES or self.state == "gathered":
-            changed_vlans_facts = self.get_vlans_facts()
+            changed_l2_interfaces_facts = self.get_l2_interfaces_facts()
         elif self.state == "rendered":
             result["rendered"] = commands
         elif self.state == "parsed":
@@ -87,21 +87,21 @@ class L2_interfaces(ConfigBase):
                 self._module.fail_json(
                     msg="value of running_config parameter must not be empty for state parsed",
                 )
-            result["parsed"] = self.get_vlans_facts(data=running_config)
+            result["parsed"] = self.get_l2_interfaces_facts(data=running_config)
         else:
-            changed_vlans_facts = []
+            changed_l2_interfaces_facts = []
 
         if self.state in self.ACTION_STATES:
-            result["before"] = existing_vlans_facts
+            result["before"] = existing_l2_interfaces_facts
             if result["changed"]:
-                result["after"] = changed_vlans_facts
+                result["after"] = existing_l2_interfaces_facts
         elif self.state == "gathered":
-            result["gathered"] = changed_vlans_facts
+            result["gathered"] = existing_l2_interfaces_facts
 
         result["warnings"] = warnings
         return result
 
-    def set_config(self, existing_vlans_facts):
+    def set_config(self, existing_l2_interfaces_facts):
         """Collect the configuration from the args passed to the module,
             collect the current configuration (as a dict from facts)
 
@@ -113,7 +113,7 @@ class L2_interfaces(ConfigBase):
         if self._module.params.get("config"):
             for cfg in self._module.params["config"]:
                 want.append(remove_empties(cfg))
-        have = existing_vlans_facts
+        have = existing_l2_interfaces_facts
         resp = self.set_state(want, have)
         return to_list(resp)
 
