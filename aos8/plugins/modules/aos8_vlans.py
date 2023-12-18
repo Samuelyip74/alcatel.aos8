@@ -808,8 +808,8 @@ def main():
         ("state", "merged", ("config",)),
         ("state", "replaced", ("config",)),
         ("state", "overridden", ("config",)),
-        ("state", "rendered", ("config",)),
-        ("state", "parsed", ("running_config",)),
+        ("state", "rendered", ("config",)),           ### TODO: yet to be implemented
+        ("state", "parsed", ("running_config",)),     ### TODO: yet to be implemented
     ]
     mutually_exclusive = [("config", "running_config")]
 
