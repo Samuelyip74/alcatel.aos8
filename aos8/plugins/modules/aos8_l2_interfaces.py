@@ -50,6 +50,7 @@ options:
           - The type of L2 interface
           - Refer to vendor documentation for valid values.
         type: str
+        required: true
         choices:
           - port
           - linkagg        
@@ -57,10 +58,12 @@ options:
         description:
           - The physical port number of logical linkagg number
         type: str
+        required: true
       mode:
         description:
           - The type of encapsulation (802.1q or clear)
         type: str
+        required: true
         choices:
           - untagged
           - tagged          
@@ -109,107 +112,91 @@ EXAMPLES = """
 # Before state:
 # -------------
 #
-# ACSW01-> show vlan
-#  vlan    type   admin   oper    ip    mtu          name
-# ------+-------+-------+------+------+------+------------------
-# 1      std       Ena     Ena   Ena    1500    MGNT
+# ACSW01-> show vlan 1 members
+#    port      type        status
+# ----------+-----------+---------------
+#   1/1/3      untagged     forwarding
+#   1/1/13     untagged       inactive
+#   1/1/19     untagged       inactive
+#   1/1/21     untagged       inactive
+#   1/1/22     untagged       inactive
+#   1/1/23     untagged       inactive
+#   1/1/25     untagged     forwarding
+#   1/1/26     untagged       inactive
+#   1/1/27     untagged       inactive
+#   1/1/28     untagged     forwarding
+
 
 ---
 - hosts: all
   gather_facts: true
   ignore_errors: true
+  name: L2 Interface merged with flash_synchro (true)
+  vars:
+    ansible_aos_flash_synchro_flag : true
   tasks:
-    - name: Run merged VLAN with existing VLANs
-      alcatel.aos8.aos8_vlans:
+    - name: Run L2 interfaces resource module with state merged
+      alcatel.aos8.aos8_l2_interfaces:
         config:
-          - vlan_id: 33
-            name: "Vlan 33"
-            admin: enable
-            mtu: 1280
-          - vlan_id: 99
-            name: "Vlan 99"
-            admin: enable
-      configuration: false
-      state: merged
+          - vlan_id: 10
+            port_type: port
+            port_number: 1/1/27
+            mode: untagged
+        state: merged
 
 
 # After state:
 # ------------
-#
-# ACSW01-> show vlan
-#  vlan    type   admin   oper    ip    mtu          name
-# ------+-------+-------+------+------+------+------------------
-# 1      std       Ena     Ena   Ena    1500    MGNT
-# 33     std       Ena     Dis   Ena    1280    Vlan_33
-# 99     std       Ena     Dis   Dis    1500    Vlan_99
+# 
+# ACSW01-> show vlan 10 members
+#    port      type        status
+# ----------+-----------+---------------
+#   1/1/3      tagged       forwarding
+#   1/1/23     tagged         inactive
+#   1/1/27     untagged       inactive
+
 
 # results
-# changed: [192.168.70.1] => {
 #     "after": [
 #         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "MGNT",
-#             "operational_state": "enable",
+#             "mode": "untagged",
+#             "port_number": "1/1/28",
+#             "port_type": "port",
 #             "vlan_id": 1
 #         },
 #         {
-#             "admin": "enable",
-#             "mtu": 1280,
-#             "name": "Vlan_33",
-#             "operational_state": "disable",
-#             "vlan_id": 33
+#             "mode": "tagged",
+#             "port_number": "1/1/27,
+#             "port_type": "port",
+#             "vlan_id": 10
 #         },
 #         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "Vlan_99",
-#             "operational_state": "disable",
-#             "vlan_id": 99
-#         },
-#     ],
-#     "before": [
-#         {
-#             "admin": "enable",
-#             "mtu": 1500,
-#             "name": "MGNT",
-#             "operational_state": "enable",
-#             "vlan_id": 1
+#             "mode": "tagged",
+#             "port_number": "1/1/23",
+#             "port_type": "port",
+#             "vlan_id": 10
 #         },
 #     ],
 #     "changed": true,
 #     "commands": [
-#         "vlan 33 name Vlan_33",
-#         "vlan 33 admin-state enable",
-#         "vlan 33 mtu-ip 1280",
-#         "vlan 99 name Vlan_99",
-#         "vlan 99 admin-state enable",
-#         "vlan 99 mtu-ip 1500"
+#         "vlan 10 members port 1/1/27 untagged"
 #     ],
 #     "invocation": {
 #         "module_args": {
 #             "config": [
 #                 {
-#                     "admin": "enable",
-#                     "mtu": 1280,
-#                     "name": "Vlan_33",
-#                     "operational_state": null,
-#                     "vlan_id": 33
-#                 },
-#                 {
-#                     "admin": "enable",
-#                     "mtu": 1500,
-#                     "name": "Vlan_99",
-#                     "operational_state": null,
-#                     "vlan_id": 99
+#                     "mode": "untagged",
+#                     "port_number": "1/1/27",
+#                     "port_type": "port",
+#                     "vlan_id": 10
 #                 }
 #             ],
-#             "configuration": false,
 #             "running_config": null,
 #             "state": "merged"
 #         }
 #     }
 # }
+
 
 # Using overridden
 

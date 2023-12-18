@@ -136,13 +136,19 @@ class L2_interfaces(ConfigBase):
             )
 
         if self.state == "overridden":
-            commands = self._state_overridden(want, have)
+            # TODO: yet to implement
+            # commands = self._state_overridden(want, have)
+            pass
         elif self.state == "deleted":
-            commands = self._state_deleted(want, have)
+            # TODO: yet to implement
+            # commands = self._state_deleted(want, have)
+            pass
         elif self.state in ("merged", "rendered"):
             commands = self._state_merged(want, have)
         elif self.state == "replaced":
-            commands = self._state_replaced(want, have)
+            # TODO: yet to implement
+            # commands = self._state_replaced(want, have)
+            pass            
         return commands
 
     def _state_replaced(self, want, have):
@@ -297,7 +303,15 @@ class L2_interfaces(ConfigBase):
     def _clear_config(self, want, have):
         # Delete the vlan config based on the want and have config
         commands = []
-        vlan = dict(have).get("port_number")
+        port_number = dict(have).get("port_number")
+        port_type = dict(have).get("port_type")
+        vlan_id = dict(have).get("vlan_id")
+        mode = dict(have).get("mode")        
+        if port_type:
+            if re.match('(\d)+\/(\d)+\/(\d)+', port_number):
+                port_type_attr = 'port'
+            else:
+                port_type_attr = 'linkagg'        
 
         if (
             have.get("port_number")
@@ -305,7 +319,7 @@ class L2_interfaces(ConfigBase):
             and (have.get("port_number") != want.get("port_number") or self.state == "deleted")
         ):
             # self.remove_command_from_config_list(vlan, "vlan", commands)
-            commands.append("no vlan " + str(have.get("vlan_id")) + " members " + port_type_attr + " " + port_number)
+            commands.append("no vlan " + str(vlan_id) + " members " + port_type_attr + " " + port_number)
             if self.state == "overridden":
                 self.have_now.remove(have)
         elif "default" not in have.get("name", ""):
