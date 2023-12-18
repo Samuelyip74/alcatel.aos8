@@ -12,9 +12,7 @@ based on the configuration.
 
 from __future__ import absolute_import, division, print_function
 
-
 __metaclass__ = type
-
 
 import re
 
@@ -71,107 +69,6 @@ class L2_interfacesFacts(object):
                 facts["l2_interfaces"].append(utils.remove_empties(cfg))
         ansible_facts["ansible_network_resources"].update(facts)
         return ansible_facts
-
-    def render_config(self, spec, conf, vlan_info):
-        """
-        Render config as dictionary structure and delete keys
-          from spec for null values
-
-        :param spec: The facts tree, generated from the argspec
-        :param conf: The configuration
-        :rtype: dictionary
-        :returns: The generated config
-        """
-        config = deepcopy(spec)
-
-        if vlan_info == "Name" and "VLAN Name" not in conf:
-            conf = list(filter(None, conf.split(" ")))
-            config["vlan_id"] = int(conf[0])
-            config["name"] = conf[1]
-            state_idx = 2
-            for i in range(2, len(conf)):  # check for index where state starts
-                if conf[i] in ["suspended", "active"]:
-                    state_idx = i
-                    break
-                elif conf[i].split("/")[0] in ["sus", "act"]:
-                    state_idx = i
-                    break
-                config["name"] += " " + conf[i]
-            try:
-                if len(conf[state_idx].split("/")) > 1:
-                    _state = conf[state_idx].split("/")[0]
-                    if _state == "sus":
-                        config["state"] = "suspend"
-                    elif _state == "act":
-                        config["state"] = "active"
-                    config["shutdown"] = "enabled"
-                else:
-                    if conf[state_idx] == "suspended":
-                        config["state"] = "suspend"
-                    elif conf[state_idx] == "active":
-                        config["state"] = "active"
-                    config["shutdown"] = "disabled"
-            except IndexError:
-                pass
-        elif vlan_info == "Type" and "VLAN Type" not in conf:
-            conf = list(filter(None, conf.split(" ")))
-            config["mtu"] = int(conf[3])
-        elif vlan_info == "Remote":
-            if len(conf.split(",")) > 1 or conf.isdigit():
-                remote_span_vlan = []
-                if len(conf.split(",")) > 1:
-                    remote_span_vlan = conf.split(",")
-                else:
-                    remote_span_vlan.append(conf)
-                remote_span = []
-                for each in remote_span_vlan:
-                    split_sp_list = each.split("-")
-                    if len(split_sp_list) > 1:  # break range
-                        for r_sp in range(int(split_sp_list[0]), int(split_sp_list[1]) + 1):
-                            remote_span.append(r_sp)
-                    else:
-                        remote_span.append(int(each))
-                config["remote_span"] = remote_span
-
-        elif vlan_info == "Private" and "Primary Secondary" not in conf:
-            conf = list(filter(None, conf.split(" ")))
-
-            pri_idx = 0
-            sec_idx = 1
-            priv_type_idx = 2
-
-            config["tmp_pvlans"] = {
-                "primary": conf[pri_idx],
-                "secondary": conf[sec_idx],
-                "sec_type": conf[priv_type_idx],
-            }
-        return utils.remove_empties(config)
-
-    def parse_vlan_config(self, vlan_conf):
-        vlan_list = list()
-
-        re1 = re.compile(r"^vlan configuration +(?P<vlan>\d+)$")
-        re2 = re.compile(r"^member +(evpn\-instance +(?P<evi>\d+) )?vni (?P<vni>[\d\-]+)$")
-
-        for line in vlan_conf.splitlines():
-            line = line.strip()
-
-            m = re1.match(line)
-            if m:
-                vlan = m.groupdict()["vlan"]
-                vlan_dict = {"vlan_id": vlan}
-                continue
-
-            m = re2.match(line)
-            if m:
-                group = m.groupdict()
-                vlan_dict.update({"member": {}})
-                vlan_dict["member"].update({"vni": group["vni"]})
-                if group["evi"]:
-                    vlan_dict["member"].update({"evi": group["evi"]})
-                vlan_list.append(vlan_dict)
-
-        return vlan_list
 
     def parse_vlan_members(self, data):
         objs = []
