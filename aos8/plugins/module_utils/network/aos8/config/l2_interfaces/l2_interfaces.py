@@ -13,6 +13,7 @@ created
 
 from __future__ import absolute_import, division, print_function
 
+import re
 
 __metaclass__ = type
 
@@ -37,7 +38,7 @@ class L2_interfaces(ConfigBase):
     gather_network_resources = ["l2_interfaces"]
 
     def __init__(self, module):
-        super(Vlans, self).__init__(module)
+        super(L2_interfaces, self).__init__(module)
 
     def get_l2_interfaces_facts(self, data=None):
         """Get the 'facts' (the current configuration)
@@ -289,7 +290,7 @@ class L2_interfaces(ConfigBase):
                     port_type_attr = 'port'
                 else:
                     port_type_attr = 'linkagg'
-            commands.append("vlan " + str(vlan_id) + "members " + port_type_attr + " " + port_number + " " + mode)
+            commands.append("vlan " + str(vlan_id) + " members " + port_type_attr + " " + port_number + " " + mode)
 
         return commands
 

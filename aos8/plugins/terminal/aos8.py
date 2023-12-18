@@ -40,6 +40,7 @@ class TerminalModule(TerminalBase):
     terminal_stderr_re = [
         re.compile(rb"ERROR: Invalid entry:", re.I),                                    # AOS8
         re.compile(rb"ERROR: Allowed range of values for mtu is 1280 - 9198", re.I),    # AOS8
+        re.compile(rb"ERROR: VLAN", re.I),    # AOS8
         re.compile(rb"% ?Error"),
         # re.compile(rb"^% \w+", re.M),
         re.compile(rb"% ?Bad secret"),
