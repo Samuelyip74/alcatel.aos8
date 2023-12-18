@@ -42,7 +42,7 @@ class L2_interfacesFacts(object):
 
         self.generated_spec = utils.generate_dict(facts_argument_spec)
 
-    def get_vlan_members_data(self, connection):
+    def get_l2_interface_date(self, connection):
         cmd = "show vlan members"
         return connection.get(cmd)
 
@@ -57,8 +57,8 @@ class L2_interfacesFacts(object):
         objs = []
 
         if not data:
-            data = self.get_vlan_members_data(connection)
-            objs = self.parse_vlan_members(data)
+            data = self.get_l2_interface_date(connection)
+            objs = self.parse_l2_interfaces(data)
 
         facts = {}
         if objs:
@@ -70,7 +70,7 @@ class L2_interfacesFacts(object):
         ansible_facts["ansible_network_resources"].update(facts)
         return ansible_facts
 
-    def parse_vlan_members(self, data):
+    def parse_l2_interfaces(self, data):
         objs = []
 
         # operate on a collection of resource x
