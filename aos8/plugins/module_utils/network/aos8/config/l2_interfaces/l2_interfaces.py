@@ -156,7 +156,7 @@ class L2_interfaces(ConfigBase):
         check = False
         for each in want:
             for every in have:
-                if every["vlan_id"] == each["vlan_id"]:
+                if every["port_number"] == each["port_number"]:
                     check = True
                     break
                 continue
@@ -181,7 +181,7 @@ class L2_interfaces(ConfigBase):
         for each in have:
             count = 0
             for every in want_local:
-                if each["vlan_id"] == every["vlan_id"]:
+                if each["port_number"] == every["port_number"]:
                     break
                 count += 1
             else:
@@ -214,7 +214,7 @@ class L2_interfaces(ConfigBase):
         check = False             
         for each in want:
             for every in have:
-                if each.get("vlan_id") == every.get("vlan_id"):
+                if each.get("port_number") == every.get("port_number"):
                     check = True
                     break
                 continue
@@ -238,7 +238,7 @@ class L2_interfaces(ConfigBase):
             check = False
             for each in want:
                 for every in have:
-                    if each.get("vlan_id") == every.get("vlan_id"):
+                    if each.get("port_number") == every.get("port_number"):
                         check = True
                         break
                     check = False
@@ -268,8 +268,11 @@ class L2_interfaces(ConfigBase):
 
     def _set_config(self, want, have):
         # Set the vlan config based on the want and have config
+        # vlan 10 members port 1/1/1 tagged
+        # vlan 10 members port 1/1/1 untagged
+
         commands = []
-        vlan = dict(want).get("vlan_id")
+        port_number = dict(want).get("port_number")
 
         # Get the diff b/w want n have
         want_dict = dict_to_set(want, sort_dictionary=True)
@@ -277,35 +280,31 @@ class L2_interfaces(ConfigBase):
         diff = want_dict - have_dict
 
         if diff:
-            name = dict(want).get("name")
-            state = dict(want).get("admin")
-            mtu = dict(want).get("mtu")
+            port_type = dict(want).get("port_type")
+            vlan_id = dict(want).get("vlan_id")
+            mode = dict(want).get("mode")
 
-            if 'vlan_id' in have.keys():
-                pass
-            else:
-                commands.append("vlan " + str(vlan)) 
-            if name:
-                commands.append("vlan " + str(vlan) + " name " + '"' + name + '"')
-            if state:
-                commands.append("vlan " + str(vlan) + " admin-state " + state)
-            if mtu:
-                commands.append("vlan " + str(vlan) + " mtu-ip " + str(mtu))
+            if port_type:
+                if re.match('(\d)+\/(\d)+\/(\d)+', port_number):
+                    port_type_attr = 'port'
+                else:
+                    port_type_attr = 'linkagg'
+            commands.append("vlan " + str(vlan_id) + "members " + port_type_attr + " " + port_number + " " + mode)
 
         return commands
 
     def _clear_config(self, want, have):
         # Delete the vlan config based on the want and have config
         commands = []
-        vlan = dict(have).get("vlan_id")
+        vlan = dict(have).get("port_number")
 
         if (
-            have.get("vlan_id")
+            have.get("port_number")
             and "default" not in have.get("name", "")
-            and (have.get("vlan_id") != want.get("vlan_id") or self.state == "deleted")
+            and (have.get("port_number") != want.get("port_number") or self.state == "deleted")
         ):
             # self.remove_command_from_config_list(vlan, "vlan", commands)
-            commands.append("no vlan " + str(vlan))
+            commands.append("no vlan " + str(have.get("vlan_id")) + " members " + port_type_attr + " " + port_number)
             if self.state == "overridden":
                 self.have_now.remove(have)
         elif "default" not in have.get("name", ""):
