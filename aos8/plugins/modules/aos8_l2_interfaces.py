@@ -27,7 +27,7 @@ DOCUMENTATION = """
 module: aos8_l2_interfaces
 short_description: Resource module to configure VLAN membership on AOS8 devices
 description:
-  This module provides declarative management of VLANs on Cisco aos8 network
+  This module provides declarative management of l2 interfaces on Alcatel AOS8 network
   devices.
 version_added: 1.0.0
 author: Samuel Yip (@samuelyip)
@@ -115,15 +115,8 @@ EXAMPLES = """
 # ACSW01-> show vlan 1 members
 #    port      type        status
 # ----------+-----------+---------------
-#   1/1/3      untagged     forwarding
-#   1/1/13     untagged       inactive
-#   1/1/19     untagged       inactive
-#   1/1/21     untagged       inactive
-#   1/1/22     untagged       inactive
-#   1/1/23     untagged       inactive
-#   1/1/25     untagged     forwarding
-#   1/1/26     untagged       inactive
-#   1/1/27     untagged       inactive
+#   1/1/26     untagged     forwarding
+#   1/1/27     untagged     forwarding
 #   1/1/28     untagged     forwarding
 
 
@@ -151,12 +144,10 @@ EXAMPLES = """
 # ACSW01-> show vlan 10 members
 #    port      type        status
 # ----------+-----------+---------------
-#   1/1/3      tagged       forwarding
-#   1/1/23     tagged         inactive
-#   1/1/27     untagged       inactive
+#   1/1/27     untagged      forwarding
 
 
-# results
+# results : {
 #     "after": [
 #         {
 #             "mode": "untagged",
@@ -165,16 +156,16 @@ EXAMPLES = """
 #             "vlan_id": 1
 #         },
 #         {
-#             "mode": "tagged",
+#             "mode": "untagged",
 #             "port_number": "1/1/27,
 #             "port_type": "port",
 #             "vlan_id": 10
 #         },
 #         {
-#             "mode": "tagged",
-#             "port_number": "1/1/23",
+#             "mode": "untagged",
+#             "port_number": "1/1/26",
 #             "port_type": "port",
-#             "vlan_id": 10
+#             "vlan_id": 1
 #         },
 #     ],
 #     "changed": true,
@@ -197,21 +188,220 @@ EXAMPLES = """
 #     }
 # }
 
-
 # Using overridden
-
-
-# Using replaced
-
-
-# Using deleted
-
-# Using Gathered (configuration: True)
-
+#
 # Before state:
+# -------------
+#
+# ACSW01-> show vlan 1 members
+#    port      type        status
+# ----------+-----------+---------------
+#   1/1/26     untagged     forwarding
+#   1/1/27     untagged     forwarding
+#   1/1/28     untagged     forwarding
 
-# Using Rendered (configuration: True)
+---
+- hosts: all
+  gather_facts: true
+  ignore_errors: true
+  name: L2 Interface overridden with flash_synchro (true)
+  vars:
+    ansible_aos_flash_synchro_flag : true
+  tasks:
+    - name: Run L2 interfaces resource module with state overridden
+      alcatel.aos8.aos8_l2_interfaces:
+        config:
+          - vlan_id: 1
+            port_type: port
+            port_number: 1/1/26
+            mode: untagged
+          - vlan_id: 10
+            port_type: port
+            port_number: 1/1/27
+            mode: untagged
+          - vlan_id: 1
+            port_type: port
+            port_number: 1/1/28
+            mode: untagged                        
+        state: overridden
 
+# After state:
+# ------------
+# 
+# ACSW01-> show vlan 10 members
+#    port      type        status
+# ----------+-----------+---------------
+#   1/1/27     untagged      forwarding  
+
+# results : {
+#     "after": [
+#         {
+#             "mode": "untagged",
+#             "port_number": "1/1/28",
+#             "port_type": "port",
+#             "vlan_id": 1
+#         },
+#         {
+#             "mode": "untagged",
+#             "port_number": "1/1/27,
+#             "port_type": "port",
+#             "vlan_id": 10
+#         },
+#         {
+#             "mode": "untagged",
+#             "port_number": "1/1/26",
+#             "port_type": "port",
+#             "vlan_id": 1
+#         },
+#     ],
+#     "changed": true,
+#     "commands": [
+#         "vlan 10 members port 1/1/27 untagged"
+#     ],
+#     "invocation": {
+#         "module_args": {
+#             "config": [
+#                 {
+#                     "mode": "untagged",
+#                     "port_number": "1/1/27",
+#                     "port_type": "port",
+#                     "vlan_id": 10
+#                 }
+#             ],
+#             "running_config": null,
+#             "state": "overridden"
+#         }
+#     }
+# }
+ 
+# Using deleted
+#
+# Before state:
+# -------------
+#
+# ACSW01-> show vlan 10 members
+#    port      type        status
+# ----------+-----------+---------------
+#   1/1/27     untagged     forwarding
+
+---
+- hosts: all
+  gather_facts: true
+  ignore_errors: true
+  name: L2 Interface deleted with flash_synchro (true)
+  vars:
+    ansible_aos_flash_synchro_flag : false
+  tasks:
+    - name: Run L2 interfaces resource module with state deleted
+      alcatel.aos8.aos8_l2_interfaces:
+        config:
+          - vlan_id: 10
+            mode: tagged
+            port_number: 1/1/27
+            port_type: port
+        state: deleted
+
+# After state:
+# -------------
+# ACSW01-> show vlan 1 members
+#    port      type        status
+# ----------+-----------+---------------
+#   1/1/26     untagged     forwarding
+#   1/1/27     untagged     forwarding
+#   1/1/28     untagged     forwarding   
+
+# results: {
+#     "after": [
+#         {
+#             "mode": "untagged",
+#             "port_number": "1/1/28",
+#             "port_type": "port",
+#             "vlan_id": 1
+#         },
+#         {
+#             "mode": "untagged",
+#             "port_number": "1/1/27,
+#             "port_type": "port",
+#             "vlan_id": 1
+#         },
+#         {
+#             "mode": "untagged",
+#             "port_number": "1/1/26",
+#             "port_type": "port",
+#             "vlan_id": 1
+#         },
+#     ],
+#     "changed": true,
+#     "commands": [
+#         "no vlan 10 members port 1/1/27"
+#     ],
+#     "invocation": {
+#         "module_args": {
+#             "config": [
+#                 {
+#                     "mode": "untagged",
+#                     "port_number": "1/1/27",
+#                     "port_type": "port",
+#                     "vlan_id": 10
+#                 }
+#             ],
+#             "running_config": null,
+#             "state": "deleted"
+#         }
+#     }
+# }
+
+# Using Rendered
+#
+# Before state:
+# -------------
+#
+# ACSW01-> show vlan 1 members
+#    port      type        status
+# ----------+-----------+---------------
+#   1/1/26     untagged     forwarding
+#   1/1/27     untagged     forwarding
+#   1/1/28     untagged     forwarding
+#
+---
+- hosts: all
+  gather_facts: true
+  ignore_errors: true
+  name: L2 Interface rendered 
+  vars:
+    ansible_aos_flash_synchro_flag : true
+  tasks:
+    - name: Run L2 interfaces resource module with state rendered
+      alcatel.aos8.aos8_l2_interfaces:
+        config:
+          - vlan_id: 10
+            port_type: port
+            port_number: 1/1/27
+            mode: untagged  
+        state: rendered
+
+# results: {
+#     "after": [
+#     ],
+#     "changed": false,
+#     "commands": [
+#         "vlan 10 members port 1/1/27 untagged"
+#     ],
+#     "invocation": {
+#         "module_args": {
+#             "config": [
+#                 {
+#                     "mode": "untagged",
+#                     "port_number": "1/1/27",
+#                     "port_type": "port",
+#                     "vlan_id": 10
+#                 }
+#             ],
+#             "running_config": null,
+#             "state": "deleted"
+#         }
+#     }
+# }
 
 """
 
