@@ -147,8 +147,7 @@ class L2_interfaces(ConfigBase):
         elif self.state in ("merged", "rendered"):
             commands = self._state_merged(want, have)
         elif self.state == "replaced":
-            # TODO: yet to implement
-            # commands = self._state_replaced(want, have)
+            commands = self._state_replaced(want, have)
             pass            
         return commands
 
@@ -259,20 +258,6 @@ class L2_interfaces(ConfigBase):
 
         return commands
 
-    def remove_command_from_config_list(self, vlan_id, cmd, commands):
-        if vlan_id not in commands and cmd != "vlan":
-            commands.insert(0, vlan_id)
-        elif cmd == "vlan":
-            commands.append("no %s" % vlan_id)
-            return commands
-        commands.append("no %s" % cmd)
-        return commands  
-
-    def add_command_to_config_list(self, vlan_id, cmd, commands):
-        if vlan_id not in commands:
-            commands.insert(0, vlan_id)
-        if cmd not in commands:
-            commands.append(cmd)
 
     def _set_config(self, want, have):
         # Set the vlan config based on the want and have config
@@ -319,21 +304,7 @@ class L2_interfaces(ConfigBase):
             and (have.get("port_number") != want.get("port_number") 
             or self.state == "deleted")
         ):
-            # self.remove_command_from_config_list(vlan, "vlan", commands)
             commands.append("no vlan " + str(vlan_id) + " members " + port_type_attr + " " + port_number)
             if self.state == "overridden":
                 self.have_now.remove(have)
-        elif "default" not in have.get("name", ""):
-            if have.get("mtu") != want.get("mtu"):
-                self.remove_command_from_config_list(vlan, "mtu", commands)
-            if have.get("remote_span") != want.get("remote_span") and want.get(
-                "remote_span",
-            ):
-                self.remove_command_from_config_list(vlan, "remote-span", commands)
-            if have.get("shutdown") != want.get("shutdown") and want.get(
-                "shutdown",
-            ):
-                self.remove_command_from_config_list(vlan, "shutdown", commands)
-            if have.get("state") != want.get("state") and want.get("state"):
-                self.remove_command_from_config_list(vlan, "state", commands)
         return commands
