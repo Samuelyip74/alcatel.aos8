@@ -23,7 +23,7 @@ LICENSE: gpl-3.0.txt
 
 DOCUMENTATION: |
 module: aos8_command
-author: Samuel Yip
+author: Samuel Yip Kah Yean (@samuelyip74)
 short_description: Module to run commands on remote devices.
 description:
   - Sends arbitrary commands to an aos8 node and returns the results read from the device.

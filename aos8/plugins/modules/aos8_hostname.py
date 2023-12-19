@@ -17,7 +17,7 @@ module: aos_hostname
 short_description: 'Manages <xxxx> attributes of <network_os> <resource>.'
 description: 'Manages <xxxx> attributes of <network_os> <resource>'
 version_added: 1.0.0
-author: Samuel Yip Kah Yean
+author: Samuel Yip Kah Yean (@samuelyip74)
 notes:
   - 'Tested against AOS8 8.5'
 options:

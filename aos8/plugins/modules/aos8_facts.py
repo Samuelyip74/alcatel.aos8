@@ -17,8 +17,9 @@ DOCUMENTATION = """
 module: aos8_facts
 short_description: Get facts about aos8 devices.
 version_added: "1.0.0"
+author: Samuel Yip Kah Yean (@samuelyip74)
 description:
-  - Collects facts from network devices running the aos8 operating
+  - Collects facts from network devices running AOS8 operating
     system. This module places the facts gathered in the fact tree keyed by the
     respective resource name.  The facts module will always collect a
     base set of facts from the device and can enable or disable
