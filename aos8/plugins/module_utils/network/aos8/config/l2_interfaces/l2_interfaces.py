@@ -64,13 +64,18 @@ class L2_interfaces(ConfigBase):
         commands = list()
         warnings = list()
         self.have_now = list()
+
+        # if state in ACTION_STATES, get interface facts from device
         if self.state in self.ACTION_STATES:
             existing_l2_interfaces_facts = self.get_l2_interfaces_facts()
         else:
             existing_l2_interfaces_facts = []
 
+        # if state in ACTION_STATES, generate commands to device or rendered commands
         if self.state in self.ACTION_STATES or self.state == "rendered":
             commands.extend(self.set_config(existing_l2_interfaces_facts))
+
+        # if state in ACTION_STATES, commands generated and check_mode false, send command to device            
         if commands and self.state in self.ACTION_STATES:
             if not self._module.check_mode:              
                 self._connection.edit_config(commands)
@@ -95,9 +100,9 @@ class L2_interfaces(ConfigBase):
         if self.state in self.ACTION_STATES:
             result["before"] = existing_l2_interfaces_facts
             if result["changed"]:
-                result["after"] = existing_l2_interfaces_facts
+                result["after"] = changed_l2_interfaces_facts
         elif self.state == "gathered":
-            result["gathered"] = existing_l2_interfaces_facts
+            result["gathered"] = changed_l2_interfaces_facts
 
         result["warnings"] = warnings
         return result
@@ -136,13 +141,9 @@ class L2_interfaces(ConfigBase):
             )
 
         if self.state == "overridden":
-            # TODO: yet to implement
-            # commands = self._state_overridden(want, have)
-            pass
+            commands = self._state_overridden(want, have)
         elif self.state == "deleted":
-            # TODO: yet to implement
-            # commands = self._state_deleted(want, have)
-            pass
+            commands = self._state_deleted(want, have)
         elif self.state in ("merged", "rendered"):
             commands = self._state_merged(want, have)
         elif self.state == "replaced":
@@ -163,7 +164,7 @@ class L2_interfaces(ConfigBase):
         check = False
         for each in want:
             for every in have:
-                if every["port_number"] == each["port_number"]:
+                if every == each :
                     check = True
                     break
                 continue
@@ -188,7 +189,7 @@ class L2_interfaces(ConfigBase):
         for each in have:
             count = 0
             for every in want_local:
-                if each["port_number"] == every["port_number"]:
+                if each == every:
                     break
                 count += 1
             else:
@@ -221,7 +222,7 @@ class L2_interfaces(ConfigBase):
         check = False             
         for each in want:
             for every in have:
-                if each.get("port_number") == every.get("port_number"):
+                if each == every:
                     check = True
                     break
                 continue
@@ -245,7 +246,7 @@ class L2_interfaces(ConfigBase):
             check = False
             for each in want:
                 for every in have:
-                    if each.get("port_number") == every.get("port_number"):
+                    if each == every:
                         check = True
                         break
                     check = False
@@ -315,8 +316,8 @@ class L2_interfaces(ConfigBase):
 
         if (
             have.get("port_number")
-            and "default" not in have.get("name", "")
-            and (have.get("port_number") != want.get("port_number") or self.state == "deleted")
+            and (have.get("port_number") != want.get("port_number") 
+            or self.state == "deleted")
         ):
             # self.remove_command_from_config_list(vlan, "vlan", commands)
             commands.append("no vlan " + str(vlan_id) + " members " + port_type_attr + " " + port_number)
