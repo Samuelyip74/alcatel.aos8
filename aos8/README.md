@@ -6,7 +6,8 @@
 
 The Ansible Alcatel AOS 8 collection includes a variety of Ansible content to help automate the management of Alcatel AOS 8 netowork appliances.
 
-This collection has been tested against Alcatel AOS 8.9.R01 on CML.
+This collection has been tested against Alcatel AOS 8.9.221.R03 GA.
+
 
 <!--start requires_ansible-->
 ## Ansible version compatibility
@@ -35,44 +36,12 @@ Name | Description
 ### Modules
 Name | Description
 --- | ---
-[alcatel.aos8.aos8_acl_interfaces](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_acl_interfaces_module.rst)|Resource module to configure ACL interfaces.
-[alcatel.aos8.aos8_acls](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_acls_module.rst)|Resource module to configure ACLs.
-[alcatel.aos8.aos8_banner](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_banner_module.rst)|Module to configure multiline banners.
-[alcatel.aos8.aos8_bgp_address_family](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_bgp_address_family_module.rst)|Resource module to configure BGP Address family.
-[alcatel.aos8.aos8_bgp_global](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_bgp_global_module.rst)|Resource module to configure BGP.
 [alcatel.aos8.aos8_command](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_command_module.rst)|Module to run commands on remote devices.
-[alcatel.aos8.aos8_config](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_config_module.rst)|Module to manage configuration sections.
-[alcatel.aos8.aos8_evpn_evi](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_evpn_evi_module.rst)|Resource module to configure L2VPN EVPN EVI.
-[alcatel.aos8.aos8_evpn_global](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_evpn_global_module.rst)|Resource module to configure L2VPN EVPN.
 [alcatel.aos8.aos8_facts](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_facts_module.rst)|Module to collect facts from remote devices.
 [alcatel.aos8.aos8_hostname](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_hostname_module.rst)|Resource module to configure hostname.
-[alcatel.aos8.aos8_interfaces](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_interfaces_module.rst)|Resource module to configure interfaces.
 [alcatel.aos8.aos8_l2_interfaces](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_l2_interfaces_module.rst)|Resource module to configure L2 interfaces.
-[alcatel.aos8.aos8_l3_interfaces](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_l3_interfaces_module.rst)|Resource module to configure L3 interfaces.
-[alcatel.aos8.aos8_lacp](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_lacp_module.rst)|Resource module to configure LACP.
-[alcatel.aos8.aos8_lacp_interfaces](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_lacp_interfaces_module.rst)|Resource module to configure LACP interfaces.
-[alcatel.aos8.aos8_lag_interfaces](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_lag_interfaces_module.rst)|Resource module to configure LAG interfaces.
-[alcatel.aos8.aos8_linkagg](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_linkagg_module.rst)|Module to configure link aggregation groups.
-[alcatel.aos8.aos8_lldp](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_lldp_module.rst)|(deprecated, removed after 2024-06-01) Manage LLDP configuration on Alcatel AOS 8 network devices.
-[alcatel.aos8.aos8_lldp_global](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_lldp_global_module.rst)|Resource module to configure LLDP.
-[alcatel.aos8.aos8_lldp_interfaces](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_lldp_interfaces_module.rst)|Resource module to configure LLDP interfaces.
-[alcatel.aos8.aos8_logging_global](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_logging_global_module.rst)|Resource module to configure logging.
-[alcatel.aos8.aos8_ntp](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_ntp_module.rst)|(deprecated, removed after 2024-01-01) Manages core NTP configuration.
-[alcatel.aos8.aos8_ntp_global](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_ntp_global_module.rst)|Resource module to configure NTP.
-[alcatel.aos8.aos8_ospf_interfaces](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_ospf_interfaces_module.rst)|Resource module to configure OSPF interfaces.
-[alcatel.aos8.aos8_ospfv2](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_ospfv2_module.rst)|Resource module to configure OSPFv2.
-[alcatel.aos8.aos8_ospfv3](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_ospfv3_module.rst)|Resource module to configure OSPFv3.
-[alcatel.aos8.aos8_ping](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_ping_module.rst)|Tests reachability using ping from aos8 switch.
-[alcatel.aos8.aos8_prefix_lists](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_prefix_lists_module.rst)|Resource module to configure prefix lists.
-[alcatel.aos8.aos8_route_maps](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_route_maps_module.rst)|Resource module to configure route maps.
-[alcatel.aos8.aos8_service](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_service_module.rst)|Resource module to configure service.
-[alcatel.aos8.aos8_snmp_server](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_snmp_server_module.rst)|Resource module to configure snmp server.
-[alcatel.aos8.aos8_static_routes](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_static_routes_module.rst)|Resource module to configure static routes.
-[alcatel.aos8.aos8_system](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_system_module.rst)|Module to manage the system attributes.
-[alcatel.aos8.aos8_user](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_user_module.rst)|Module to manage the aggregates of local users.
 [alcatel.aos8.aos8_vlans](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_vlans_module.rst)|Resource module to configure VLANs.
-[alcatel.aos8.aos8_vrf](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_vrf_module.rst)|Module to configure VRF definitions.
-[alcatel.aos8.aos8_vxlan_vtep](https://github.com/ansible-collections/alcatel.aos8/blob/main/docs/alcatel.aos8.aos8_vxlan_vtep_module.rst)|Resource module to configure VXLAN VTEP interface.
+
 
 <!--end collection content-->
 
@@ -80,7 +49,8 @@ Name | Description
 
 You can install the Alcatel AOS 8 collection with the Ansible Galaxy CLI:
 
-    ansible-galaxy collection install alcatel.aos8
+    ansible-galaxy collection install alcatel.aos8  
+    ansible-galaxy collection install alcatel-aos8-<version>.tar.gz --force
 
 You can also include it in a `requirements.yml` file and install it with `ansible-galaxy collection install -r requirements.yml`, using the format:
 
@@ -104,13 +74,11 @@ The following example task replaces configuration changes in the existing config
 - name: Replace device configuration of specified L2 interfaces with provided configuration.
   alcatel.aos8.aos8_l2_interfaces:
     config:
-      - name: GigabitEthernet0/2
-        trunk:
-          - allowed_vlans: 20-25,40
-            native_vlan: 20
-            pruning_vlans: 10
-            encapsulation: isl
-    state: replaced
+      - vlan_id: 20
+        port_type: port
+        port_number: 1/1/27
+        mode: tagged  
+    state: merged
 ```
 
 **NOTE**: For Ansible 2.9, you may not see deprecation warnings when you run your playbooks with this collection. Use this documentation to track when a module is deprecated.

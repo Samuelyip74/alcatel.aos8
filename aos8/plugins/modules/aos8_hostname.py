@@ -19,7 +19,7 @@ description: 'Manages <xxxx> attributes of <network_os> <resource>'
 version_added: 1.0.0
 author: Samuel Yip Kah Yean (@samuelyip74)
 notes:
-  - 'Tested against AOS8 8.5'
+  - Tested against Alcatel-Lucent AOS8 OmniSwitch with Version 8.9.221.R03 GA.
 options:
   config:
     description: The provided configuration
