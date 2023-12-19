@@ -424,7 +424,7 @@ commands:
   description: The set of commands pushed to the remote device.
   returned: always
   type: list
-  sample: ['vlan 20', 'name vlan_20', 'mtu 600', 'remote-span']
+  sample: ['vlan 10 member 1/1/1 untagged', 'vlan 10 member 1/1/1 tagged']
 """
 from ansible.module_utils.basic import AnsibleModule
 
@@ -444,7 +444,7 @@ def main():
         ("state", "merged", ("config",)),
         ("state", "replaced", ("config",)),
         ("state", "overridden", ("config",)),
-        ("state", "rendered", ("config",)),           ### TODO: yet to be implemented
+        ("state", "rendered", ("config",)),           
         ("state", "parsed", ("running_config",)),     ### TODO: yet to be implemented
     ]
     mutually_exclusive = [("config", "running_config")]
