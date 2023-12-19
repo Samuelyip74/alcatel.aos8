@@ -30,7 +30,7 @@ description:
   This module provides declarative management of l2 interfaces on Alcatel AOS8 network
   devices.
 version_added: 1.0.0
-author: Samuel Yip (@samuelyip)
+author: Samuel Yip Kah Yean (@samuelyip74)
 notes:
   - Tested against Alcatel-Lucent AOS8 OmniSwitch with Version 8.9.221.R03 GA.
   - This module works with connection C(network_cli).
