@@ -4,7 +4,7 @@
 # GNU General Public License v3.0+
 # (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 """
-The aos8_vlans class
+The aos8_l2_interfaces class
 It is in this file where the current configuration (as dict)
 is compared to the provided configuration (as dict) and the command set
 necessary to bring the current configuration to it's desired end-state is
@@ -197,12 +197,12 @@ class L2_interfaces(ConfigBase):
                 commands.extend(self._clear_config(every, each))
                 continue
             commands.extend(self._set_config(every, each))
-            # as the pre-existing VLAN are now configured by
+            # as the pre-existing L2 Interface are now configured by
             # above set_config call, deleting the respective
-            # VLAN entry from the want_local list
+            # L2 Interface entry from the want_local list
             del want_local[count]
 
-        # Iterating through want_local list which now only have new VLANs to be
+        # Iterating through want_local list which now only have new L2 Interfaces to be
         # configured
         for each in want_local:
             commands.extend(self._set_config(each, dict()))
@@ -260,7 +260,7 @@ class L2_interfaces(ConfigBase):
 
 
     def _set_config(self, want, have):
-        # Set the vlan config based on the want and have config
+        # Set the L2 Interface config based on the want and have config
         # vlan 10 members port 1/1/1 tagged
         # vlan 10 members port 1/1/1 untagged
 
@@ -287,7 +287,7 @@ class L2_interfaces(ConfigBase):
         return commands
 
     def _clear_config(self, want, have):
-        # Delete the vlan config based on the want and have config
+        # Delete the L2 Interface config based on the want and have config
         commands = []
         port_number = dict(have).get("port_number")
         port_type = dict(have).get("port_type")
