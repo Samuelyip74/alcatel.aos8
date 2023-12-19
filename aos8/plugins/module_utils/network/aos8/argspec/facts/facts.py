@@ -13,7 +13,7 @@ The arg spec for the aos8 facts module.
 
 
 class FactsArgs(object):  # pylint: disable=R0903
-    """ The arg spec for the aos8 facts module
+    """ The arg spec for the aos8_facts module
     """
 
     def __init__(self, **kwargs):
