@@ -308,17 +308,4 @@ class Vlans(ConfigBase):
             commands.append("no vlan " + str(vlan))
             if self.state == "overridden":
                 self.have_now.remove(have)
-        elif "default" not in have.get("name", ""):
-            if have.get("mtu") != want.get("mtu"):
-                self.remove_command_from_config_list(vlan, "mtu", commands)
-            if have.get("remote_span") != want.get("remote_span") and want.get(
-                "remote_span",
-            ):
-                self.remove_command_from_config_list(vlan, "remote-span", commands)
-            if have.get("shutdown") != want.get("shutdown") and want.get(
-                "shutdown",
-            ):
-                self.remove_command_from_config_list(vlan, "shutdown", commands)
-            if have.get("state") != want.get("state") and want.get("state"):
-                self.remove_command_from_config_list(vlan, "state", commands)
         return commands
