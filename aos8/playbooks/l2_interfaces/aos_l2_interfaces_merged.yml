@@ -9,10 +9,10 @@
     - name: Run L2 interfaces resource module with state merged
       alcatel.aos8.aos8_l2_interfaces:
         config:
-          - vlan_id: 1
+          - vlan_id: 20
             port_type: port
             port_number: 1/1/27
-            mode: untagged
+            mode: tagged  
         state: merged
 
 
